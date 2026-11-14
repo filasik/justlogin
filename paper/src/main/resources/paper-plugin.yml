@@ -1,0 +1,99 @@
+name: ${pluginName}
+version: '${version}'
+main: ${pluginMain}
+loader: ${pluginLoader}
+api-version: '${apiVersion}'
+folia-supported: true
+description: ${pluginDescription}
+website: ${pluginWebsite}
+authors:
+  - skerik
+
+dependencies:
+  server:
+    floodgate:
+      load: BEFORE
+      required: false
+    ViaVersion:
+      load: BEFORE
+      required: false
+
+permissions:
+  justlogin.use:
+    description: Basic player authentication commands (/login, /register, /logout, /changepassword, /unregister)
+    default: true
+  justlogin.2fa:
+    description: Manage TOTP two-factor authentication (/2fa)
+    default: true
+  justlogin.premium:
+    description: Toggle Mojang online-mode auto-login on proxied networks (/premium, /cracked)
+    default: true
+  justlogin.email:
+    description: Manage account recovery email and reset forgotten passwords (/email)
+    default: true
+  justlogin.skin:
+    description: Change or reset your own player skin in-game (/skin)
+    default: true
+  justlogin.skin.bypasscooldown:
+    description: Bypass /skin command cooldown
+    default: op
+  justlogin.editor:
+    description: Open and apply edits from the web editor (/jl editor, /jl applyedits)
+    default: op
+  justlogin.admin.reload:
+    description: Reload JustLogin configuration and messages (/jl reload)
+    default: op
+  justlogin.admin.status:
+    description: Inspect player account metadata (/jl status)
+    default: op
+  justlogin.admin.audit:
+    description: View recent JustLogin audit entries (/jl audit)
+    default: op
+  justlogin.admin.unregister:
+    description: Delete player accounts (/jl unregister)
+    default: op
+  justlogin.admin.changepass:
+    description: Force-change a player password (/jl changepass)
+    default: op
+  justlogin.admin.reset2fa:
+    description: Clear a player's 2FA enrollment (/jl reset2fa)
+    default: op
+  justlogin.admin.setpremium:
+    description: Override a player's premium/cracked flag (/jl setpremium)
+    default: op
+  justlogin.admin.forcepw:
+    description: Toggle forced password change on next login (/jl forcepw)
+    default: op
+  justlogin.admin.rename:
+    description: Rename a stored account while preserving game_uuid (/jl rename)
+    default: op
+  justlogin.admin.merge:
+    description: Merge duplicate/renamed accounts without losing game_uuid (/jl merge)
+    default: op
+  justlogin.admin.gui:
+    description: Open the interactive account management GUI (/jl gui)
+    default: op
+  justlogin.admin.import:
+    description: Import accounts from legacy auth plugins (/jl import)
+    default: op
+  justlogin.admin.skin:
+    description: Change or reset another player's skin (/jl skin)
+    default: op
+  justlogin.admin:
+    description: Full JustLogin administration (/justlogin)
+    default: op
+    children:
+      justlogin.editor: true
+      justlogin.admin.reload: true
+      justlogin.admin.status: true
+      justlogin.admin.audit: true
+      justlogin.admin.unregister: true
+      justlogin.admin.changepass: true
+      justlogin.admin.reset2fa: true
+      justlogin.admin.setpremium: true
+      justlogin.admin.forcepw: true
+      justlogin.admin.rename: true
+      justlogin.admin.merge: true
+      justlogin.admin.gui: true
+      justlogin.admin.import: true
+      justlogin.admin.skin: true

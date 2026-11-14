@@ -1,0 +1,7 @@
+name: ${pluginName}
+version: '${version}'
+main: me.skerik.justlogin.bungee.JustLoginBungee
+author: skerik
+description: ${pluginDescription}
+softDepends:
+  - floodgate

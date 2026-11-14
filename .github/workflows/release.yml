@@ -1,0 +1,42 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+      HANGAR_API_TOKEN: ${{ secrets.HANGAR_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: gradle
+      - name: Build release artifacts
+        env:
+          BSTATS_ID: ${{ secrets.BSTATS_ID }}
+        run: ./gradlew build -PbstatsId=${BSTATS_ID:-35316} --no-daemon
+      - name: Smoke test on Paper
+        run: ./scripts/smoke-test.sh --no-build
+      - uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          body_path: CHANGELOG.md
+          files: |
+            paper/build/libs/JustLogin-*.jar
+            velocity/build/libs/JustLogin-Velocity-*.jar
+            bungee/build/libs/JustLogin-Bungee-*.jar
+      - name: Modrinth (one version per platform)
+        if: env.MODRINTH_TOKEN != ''
+        run: ./gradlew :paper:modrinth :velocity:modrinth :bungee:modrinth --no-daemon
+      - name: Hangar (one version, three platforms)
+        if: env.HANGAR_API_TOKEN != ''
+        run: ./gradlew publishPluginPublicationToHangar --no-daemon

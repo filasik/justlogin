@@ -1,0 +1,12 @@
+{
+  "id": "justlogin",
+  "name": "${pluginName}",
+  "version": "${version}",
+  "description": "${pluginDescription}",
+  "url": "${pluginWebsite}",
+  "authors": ["skerik"],
+  "main": "me.skerik.justlogin.velocity.JustLoginVelocity",
+  "dependencies": [
+    { "id": "floodgate", "optional": true }
+  ]
+}

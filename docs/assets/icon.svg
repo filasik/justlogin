@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="52%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#4338ca"/>
+    </linearGradient>
+    <linearGradient id="badge" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0891b2"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- justlogin.net squircle container -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+
+  <!-- Translucent shield halo -->
+  <path d="M256 76 L396 130 V248 C396 342 332 408 256 440 C180 408 116 342 116 248 V130 Z"
+        fill="#ffffff" opacity="0.22"/>
+
+  <!-- Foreground crisp white padlock -->
+  <path d="M196 218 V176 C196 141 223 116 256 116 C289 116 316 141 316 176 V218"
+        fill="none" stroke="#ffffff" stroke-width="34" stroke-linecap="round"/>
+
+  <rect x="150" y="210" width="212" height="172" rx="38" fill="#ffffff"/>
+
+  <!-- Keyhole / verified security core -->
+  <circle cx="256" cy="284" r="24" fill="url(#badge)"/>
+  <rect x="244" y="294" width="24" height="44" rx="12" fill="url(#badge)"/>
+</svg>

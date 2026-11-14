@@ -1,0 +1,56 @@
+# ============================================================================
+#  JustLogin proxy configuration (Velocity)
+#  Support: https://github.com/filasik/justLogin
+# ============================================================================
+
+# Config format version. Do not change.
+config-version: 2
+
+# Language of proxy messages: en, cs, sk.
+locale: en
+
+# Anonymous usage statistics through bStats (plugins/bStats/config.yml global switch also applies).
+metrics: true
+
+username:
+  regex: "^[a-zA-Z0-9_]{3,16}$"
+
+proxy:
+  # MUST match Paper's proxy.shared-secret (minimum 16 characters)
+  shared-secret: "CHANGE-ME-TO-A-LONG-RANDOM-SECRET"
+  # Check Mojang API on first unseen username (false by default per threat model #3)
+  auto-detect-mojang: false
+  mojang-cache-seconds: 300
+  floodgate-fallback: true
+  # Optional auth/limbo backend server names; when non-empty, unauthenticated players cannot switch away
+  auth-servers: []
+
+skins:
+  # Apply saved /skin textures and optional Mojang skins on Velocity proxy
+  enabled: true
+  # Automatically restore matching Mojang skin by username for cracked/offline players (strictly cosmetic)
+  restore-cracked-by-name: true
+  cache-seconds: 600
+
+storage:
+  # Use "mariadb" when Velocity connects multiple Paper servers (and configure the same DB on each Paper backend!)
+  type: sqlite
+  sqlite:
+    file: "data/justlogin.db"
+    pool-size: 4
+  mariadb:
+    host: "localhost"
+    port: 3306
+    database: "justlogin"
+    user: "root"
+    password: ""
+    pool-size: 10
+    ssl-mode: ""
+
+messages:
+  invalid-username: "Your username does not match the server rules."
+  missing-secret: "JustLogin proxy shared-secret is not configured! Rejecting connection."
+  auth-required-server: "Please authenticate before switching servers."
+  not-ready: "JustLogin proxy is not ready or is misconfigured."
+  auth-service-error: "Authentication service error. Please try again in a moment."
+  auth-server-unavailable: "Authentication server is currently unavailable. Please try again shortly."

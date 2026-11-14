@@ -1,0 +1,176 @@
+# ============================================================================
+#  JustLogin configuration
+#  Reload most options with /justlogin reload (or /jl reload).
+#  Support: https://github.com/filasik/justLogin
+# ============================================================================
+
+# Config format version. Do not change: when you update the plugin, options added in the new version
+# are merged into this file automatically (your values stay, a backup config.yml.bak-v<n> is saved first).
+config-version: 5
+
+# Language of all player-facing messages: en, cs, sk.
+# The files plugins/JustLogin/messages_<locale>.yml are yours to edit; missing keys fall back to built-in English.
+locale: en
+
+# Check GitHub releases for a newer version (async at startup and every 12 hours).
+# Players with justlogin.admin are notified when they authenticate.
+update-check: true
+
+# Anonymous usage statistics through bStats (server count, Minecraft version, ...).
+# Set to false to switch them off for this plugin. The global switch is plugins/bStats/config.yml.
+metrics: true
+
+login:
+  # Primary authentication interface for Java 1.21.7+ clients:
+  # - "dialog": Native Minecraft modal Dialog during Configuration phase (falls back to command for Floodgate / <1.21.7)
+  # - "command": Classic in-game pre-login freeze with /register and /login commands
+  ui: dialog
+  # Maximum seconds a player has to finish registration or login before being kicked
+  timeout-seconds: 60
+  # Kick a new incoming connection if the same username is already online and authenticated
+  kick-duplicate-online: true
+  # Automatically fall back to command login UI for Bedrock (Floodgate) or legacy (<1.21.7) clients
+  fallback-for-legacy-clients: true
+  # Display a title/subtitle prompt while awaiting /register, /login, or /2fa verify in command mode
+  title-reminder: true
+  # Minimalist single password field in the Register Dialog (set false for password + confirm field)
+  dialog-single-password: true
+
+bedrock:
+  # Use native Bedrock Cumulus forms when Floodgate is installed (falls back seamlessly to /register and /login)
+  cumulus-forms: true
+
+captcha:
+  # Pre-auth captcha protection against scripted brute-force / bots
+  enabled: true
+  # Always require /captcha <code> before registration
+  require-on-register: false
+  # Trigger captcha challenge after N failed password/recovery attempts (0 disables failure trigger)
+  trigger-after-failures: 3
+  length: 5
+  expire-seconds: 120
+
+username:
+  # Strict allowed character pattern for player usernames (validated before DB lookups)
+  regex: "^[a-zA-Z0-9_]{3,16}$"
+
+password:
+  min-length: 8
+  max-length: 128
+  reject-username-as-password: true
+  reject-common-passwords: true
+  # Default hashing algorithm is Argon2id (legacy AuthMe/BCrypt/PBKDF2 hashes automatically rehash on login)
+  argon2:
+    memory-kib: 19456
+    iterations: 2
+    parallelism: 1
+  hashing:
+    max-concurrent: 4
+    max-queued: 64
+
+rate-limit:
+  max-attempts-per-account-ip: 5
+  max-attempts-per-ip: 20
+  base-backoff-millis: 1000
+  lockout-seconds: 300
+
+registration:
+  # Maximum accounts that can be registered from the same IP address (0 disables the limit)
+  max-accounts-per-ip: 5
+
+audit:
+  # Automatically prune audit log entries older than N days during periodic maintenance (0 keeps all entries)
+  retention-days: 90
+
+sessions:
+  # Security-safe default: OFF. Enable only if you want IP-bound HMAC auto-relogin sessions.
+  enabled: false
+  duration-seconds: 3600
+
+totp:
+  # Issuer label displayed inside authenticator apps (Google Authenticator, Aegis, 2FAS, etc.)
+  issuer: "JustLogin"
+  # Allowed clock-drift steps (+/- 30s per step)
+  window-steps: 1
+
+premium:
+  # Enable verified Mojang auto-login (/premium, /cracked, encryption challenge & Mojang skins)
+  # directly on standalone Paper (online-mode=false) without requiring Velocity or BungeeCord.
+  # Automatically stays idle when server.properties online-mode=true or proxy.enabled=true.
+  standalone-enabled: true
+  # Check Mojang API on first unseen join (off by default per threat model #3: protects cracked/offline accounts)
+  auto-detect-mojang: false
+  mojang-cache-seconds: 300
+  # Include player IP in Mojang sessionserver hasJoined verification (keep false behind NAT / local tunnels)
+  prevent-proxy-connections: false
+  # Allow premium-confirmed accounts with a password to fall back to password login if the standalone Netty hook is disabled/inactive
+  fallback-to-password: false
+
+skins:
+  # Enable built-in JustLogin skin restoration and /skin management (works standalone & behind proxies)
+  enabled: true
+  # Automatically fetch and apply the matching Mojang skin by username for cracked/offline players (cosmetic only; never grants /premium)
+  restore-cracked-by-name: true
+  # Allow authenticated players to change skins in-game with /skin <player|reset>
+  command-enabled: true
+  # Cooldown in seconds between /skin changes per player (0 disables cooldown)
+  cooldown-seconds: 60
+  # How long fetched Mojang skin textures remain cached in memory (seconds)
+  cache-seconds: 600
+
+proxy:
+  # Enable ONLY when Paper sits behind Velocity or BungeeCord running the JustLogin proxy module.
+  # When true, JustLogin verifies Paper's forwarding configuration on startup and fails closed if invalid.
+  enabled: false
+  # "standalone" | "velocity" | "bungee"
+  mode: standalone
+  # Shared HMAC secret between proxy and Paper backend (minimum 16 characters when proxy.enabled=true)
+  shared-secret: ""
+  # Require Velocity/Bungee forwarding to be enabled in config/paper-global.yml or spigot.yml when proxy.enabled=true
+  require-forwarding-config: true
+
+storage:
+  # "sqlite" (default, single file) or "mariadb" (recommended for multi-server proxy networks). Restart required.
+  type: sqlite
+  sqlite:
+    file: "data/justlogin.db"
+    pool-size: 4
+  mariadb:
+    host: "localhost"
+    port: 3306
+    database: "justlogin"
+    user: "root"
+    password: ""
+    pool-size: 10
+    # Leave empty, or set "trust" when using a self-signed certificate
+    ssl-mode: ""
+
+editor:
+  # Hosted client-side web editor URL (live at https://justlogin.net; encryption key stays in the URL #fragment)
+  web-url: "https://justlogin.net"
+  relay-url: "https://bytebin.lucko.me"
+  page-size: 500
+  ttl-seconds: 1800
+  local-http:
+    # Optional Varianta B: serve the static editor + temporary encrypted relay directly on loopback 127.0.0.1
+    enabled: false
+    bind: "127.0.0.1"
+    port: 8787
+
+email:
+  # Optional outbound SMTP password recovery (/email set, /email recover) using pure JDK sockets
+  enabled: false
+  code-ttl-seconds: 600
+  cooldown-seconds: 120
+  server-name: "Minecraft Server"
+  smtp:
+    host: "smtp.example.com"
+    port: 587
+    # "STARTTLS" (587), "SSL" (465), or "NONE"
+    security: "STARTTLS"
+    username: ""
+    password: ""
+    from-address: "noreply@example.com"
+    from-name: "JustLogin"
+    connect-timeout-ms: 5000
+    read-timeout-ms: 10000

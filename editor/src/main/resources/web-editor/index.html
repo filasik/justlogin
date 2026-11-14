@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src https: http://localhost:* http://127.0.0.1:*;">
+  <title>JustLogin Web Editor · justlogin.net</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f3f5fa;
+      --surface: #ffffff;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --line-strong: #cbd5e1;
+      --accent: #2563eb;
+      --accent-ink: #ffffff;
+      --accent-soft: #e3ebff;
+      --danger: #b83a2e;
+      --danger-soft: #fbe6e3;
+      --warn: #8a5f00;
+      --warn-soft: #f6ead0;
+      --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+      --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, "Helvetica Neue", sans-serif;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        color-scheme: dark;
+        --bg: #0e1220;
+        --surface: #151a2b;
+        --ink: #e8ecf6;
+        --muted: #8a94ad;
+        --line: #232a40;
+        --line-strong: #33405e;
+        --accent: #6ea0ff;
+        --accent-ink: #0a1124;
+        --accent-soft: #19274d;
+        --danger: #f08a7a;
+        --danger-soft: #36201f;
+        --warn: #e2b04a;
+        --warn-soft: #302612;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 14px/1.5 var(--sans);
+      font-feature-settings: "tnum" 1, "cv11" 1;
+      -webkit-font-smoothing: antialiased;
+    }
+    button, input { font: inherit; color: inherit; }
+    button { cursor: pointer; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 28px 24px 96px; }
+
+    /* ---------- header ---------- */
+    .top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .mark { width: 40px; height: 40px; flex: none; }
+    h1 { margin: 0; font-size: 20px; font-weight: 650; letter-spacing: -0.01em; line-height: 1.2; }
+    h1 span { color: var(--muted); font-weight: 450; }
+    .tagline { margin: 10px 0 0; color: var(--muted); }
+    .status { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line-strong); flex: none; }
+    .status[data-kind="ok"] .dot { background: var(--accent); }
+    .status[data-kind="busy"] .dot { background: var(--warn); }
+    .status[data-kind="error"] { color: var(--danger); }
+    .status[data-kind="error"] .dot { background: var(--danger); }
+
+    .demo-note {
+      margin: 16px 0 0; padding: 7px 14px; border: 1px dashed var(--line-strong); border-radius: 8px;
+      color: var(--muted); font-size: 13px;
+    }
+    .demo-note b { color: var(--ink); font-weight: 600; }
+
+    /* ---------- figures ---------- */
+    .figures { display: flex; margin: 20px 0 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .figures[hidden] { display: none; }
+    .figure { flex: 1; padding: 10px 0 10px 20px; border-left: 1px solid var(--line); }
+    .figure:first-child { padding-left: 0; border-left: 0; }
+    .figure dt { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .figure dd { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.2; }
+
+    /* ---------- toolbar ---------- */
+    .toolbar { display: flex; gap: 12px; align-items: center; margin: 18px 0 4px; }
+    .search { position: relative; flex: 1; }
+    .search svg { position: absolute; left: 12px; top: 50%; width: 16px; height: 16px; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+    .search input {
+      width: 100%; height: 38px; padding: 0 12px 0 36px; background: var(--surface);
+      border: 1px solid var(--line); border-radius: 8px;
+    }
+    .search input::placeholder { color: var(--muted); }
+    .search input:hover { border-color: var(--line-strong); }
+    .btn {
+      height: 38px; padding: 0 16px; border-radius: 8px; border: 1px solid var(--line-strong);
+      background: transparent; font-weight: 550; white-space: nowrap;
+    }
+    .btn:hover { background: var(--surface); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+    .btn.primary:hover { filter: brightness(1.08); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; filter: none; }
+    .btn.primary:disabled { background: var(--accent); }
+
+    /* ---------- table ---------- */
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      position: sticky; top: 0; z-index: 1; background: var(--bg);
+      text-align: left; padding: 10px 12px; font-size: 12px; font-weight: 500; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--line-strong);
+    }
+    tbody td { padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+    tbody tr { position: relative; }
+    tbody tr:hover { background: color-mix(in srgb, var(--surface) 70%, transparent); }
+    tbody tr.changed td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
+    tbody tr.removed .name { text-decoration: line-through; text-decoration-color: var(--danger); }
+    tbody tr.removed td:not(:last-child) { opacity: 0.45; }
+    th:first-child, td:first-child { padding-left: 14px; }
+    th:last-child, td:last-child { text-align: right; }
+
+    .name { font-weight: 600; letter-spacing: -0.005em; }
+    .uuid {
+      display: inline-block; margin-top: 1px; padding: 0; border: 0; background: none;
+      font: 12px/1.4 var(--mono); color: var(--muted); text-align: left;
+    }
+    .uuid:hover { color: var(--ink); }
+    .tag[hidden] { display: none; }
+    .tag {
+      display: inline-block; margin-left: 8px; padding: 0 7px; border-radius: 99px; vertical-align: 1px;
+      font-size: 11px; font-weight: 550; background: var(--warn-soft); color: var(--warn);
+    }
+
+    .seg { display: inline-flex; padding: 2px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--surface); }
+    .seg button { height: 26px; padding: 0 12px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); font-size: 13px; font-weight: 500; }
+    .seg button:hover { color: var(--ink); }
+    .seg button[aria-checked="true"] { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+    .seg button.cracked[aria-checked="true"] { background: var(--line); color: var(--ink); }
+
+    .state { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); }
+    .state.on { color: var(--ink); }
+    .state .dot { width: 7px; height: 7px; }
+    .state.on .dot { background: var(--accent); }
+
+    .switch { position: relative; display: inline-block; width: 34px; height: 20px; }
+    .switch input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+    .switch i { position: absolute; inset: 0; border-radius: 99px; background: var(--line-strong); transition: background .15s; pointer-events: none; }
+    .switch i::after { content: ""; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: var(--surface); transition: transform .15s; }
+    .switch input:checked + i { background: var(--accent); }
+    .switch input:checked + i::after { transform: translateX(14px); }
+    .switch input:focus-visible + i { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .link { padding: 4px 6px; border: 0; background: none; color: var(--muted); font-size: 13px; border-radius: 6px; }
+    .link:hover { color: var(--danger); background: var(--danger-soft); }
+    .link.undo:hover { color: var(--ink); background: var(--line); }
+
+    .empty { padding: 72px 0; text-align: center; color: var(--muted); }
+    .empty h2 { margin: 0 0 6px; font-size: 16px; font-weight: 600; color: var(--ink); }
+    .empty p { margin: 0 auto 20px; max-width: 44ch; }
+    code { padding: 1px 6px; border-radius: 5px; background: var(--line); font: 0.92em var(--mono); }
+
+    /* ---------- result ---------- */
+    .result {
+      display: none; margin: 16px 0 0; padding: 14px 16px; border: 1px solid var(--accent); border-radius: 8px;
+      background: var(--accent-soft); align-items: center; gap: 14px; flex-wrap: wrap;
+    }
+    .result.show { display: flex; }
+    .result span { color: var(--muted); }
+    .result code { background: var(--surface); border: 1px solid var(--line); padding: 4px 10px; font-size: 13px; color: var(--ink); user-select: all; }
+    .result .btn { height: 30px; padding: 0 12px; margin-left: auto; font-size: 13px; }
+
+    /* ---------- bottom bar ---------- */
+    .bar {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+      background: color-mix(in srgb, var(--bg) 97%, transparent); border-top: 1px solid var(--line-strong);
+      -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    }
+    .bar-inner { max-width: 1040px; margin: 0 auto; padding: 12px 24px; display: flex; align-items: center; gap: 12px; }
+    .bar .count { flex: 1; color: var(--muted); }
+    .bar .count b { color: var(--ink); font-weight: 600; }
+    details.relay { color: var(--muted); font-size: 13px; }
+    details.relay summary { cursor: pointer; list-style: none; }
+    details.relay summary::-webkit-details-marker { display: none; }
+    details.relay summary::before { content: "Relay"; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line-strong); }
+    details.relay[open] summary::before { color: var(--ink); }
+    details.relay { position: relative; }
+    .relay-field { position: absolute; left: 0; bottom: calc(100% + 22px); width: min(360px, calc(100vw - 32px));
+      padding: 12px; background: var(--surface); border: 1px solid var(--line-strong); border-radius: 8px; }
+    .relay-field label { display: block; margin-bottom: 6px; font-size: 12px; }
+    .relay-field input { width: 100%; height: 34px; padding: 0 10px; border: 1px solid var(--line-strong); border-radius: 6px; background: var(--bg); font: 13px var(--mono); }
+
+    @media (max-width: 820px) {
+      .wrap { padding: 28px 16px 112px; }
+      .hide-sm { display: none; }
+      .figure dd { font-size: 22px; }
+      .bar-inner { padding: 12px 16px; }
+      .bar .count { display: none; }
+      .bar-inner .btn { flex: 1; }
+      .toolbar { flex-wrap: wrap; }
+      thead { display: none; }
+      table, tbody { display: block; }
+      tbody tr { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px 12px; padding: 14px 4px 14px 12px; border-bottom: 1px solid var(--line); }
+      tbody td { padding: 0; border: 0; display: block; }
+      tbody td:nth-child(1) { grid-column: 1; grid-row: 1; padding: 0; }
+      tbody td:nth-child(6) { grid-column: 2; grid-row: 1; }
+      tbody td:nth-child(2) { grid-column: 1; grid-row: 2; }
+      tbody td:nth-child(4) { grid-column: 2; grid-row: 2; text-align: right; }
+      tbody tr.changed td:first-child { box-shadow: none; }
+      tbody tr.changed { box-shadow: inset 3px 0 0 var(--accent); }
+      .uuid { word-break: break-all; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="top">
+      <div class="brand">
+        <svg class="mark" viewBox="0 0 512 512" aria-hidden="true">
+          <defs>
+            <linearGradient id="jlBg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#06b6d4"/>
+              <stop offset="52%" stop-color="#2563eb"/>
+              <stop offset="100%" stop-color="#4338ca"/>
+            </linearGradient>
+            <linearGradient id="jlBadge" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#0891b2"/>
+              <stop offset="100%" stop-color="#1d4ed8"/>
+            </linearGradient>
+          </defs>
+          <rect width="512" height="512" rx="112" fill="url(#jlBg)"/>
+          <path d="M256 76 L396 130 V248 C396 342 332 408 256 440 C180 408 116 342 116 248 V130 Z" fill="#fff" opacity="0.22"/>
+          <path d="M196 218 V176 C196 141 223 116 256 116 C289 116 316 141 316 176 V218" fill="none" stroke="#fff" stroke-width="34" stroke-linecap="round"/>
+          <rect x="150" y="210" width="212" height="172" rx="38" fill="#fff"/>
+          <circle cx="256" cy="284" r="24" fill="url(#jlBadge)"/>
+          <rect x="244" y="294" width="24" height="44" rx="12" fill="url(#jlBadge)"/>
+        </svg>
+        <h1>JustLogin <span>Web Editor</span></h1>
+      </div>
+      <div id="status" class="status" data-kind="idle"><span class="dot"></span><span id="statusText">Waiting for a session</span></div>
+    </div>
+    <p class="tagline">Edited entirely in your browser and encrypted with AES-256-GCM. Passwords, TOTP secrets and IP addresses are never uploaded.</p>
+  </header>
+
+  <p id="demoNote" class="demo-note" hidden><b>Demo data.</b> This is a preview with made-up accounts. Nothing is downloaded or uploaded.</p>
+
+  <dl id="figures" class="figures" hidden>
+    <div class="figure"><dt>Accounts</dt><dd id="figTotal">0</dd></div>
+    <div class="figure"><dt>Premium</dt><dd id="figPremium">0</dd></div>
+    <div class="figure"><dt>With 2FA</dt><dd id="figTotp">0</dd></div>
+    <div class="figure"><dt>Page</dt><dd id="figPage">1</dd></div>
+  </dl>
+
+  <div class="toolbar">
+    <label class="search">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/></svg>
+      <input id="search" type="search" placeholder="Filter by username or UUID" autocomplete="off" spellcheck="false" aria-label="Filter accounts">
+    </label>
+    <button id="loadBtn" class="btn" type="button">Reload</button>
+  </div>
+
+  <div id="resultBox" class="result" role="status"></div>
+
+  <table id="table" hidden>
+    <thead>
+      <tr>
+        <th>Account</th>
+        <th>Login mode</th>
+        <th class="hide-sm">2FA</th>
+        <th>Force reset</th>
+        <th class="hide-sm">Last login</th>
+        <th><span class="sr-only" style="position:absolute;left:-9999px">Actions</span></th>
+      </tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+
+  <div id="empty" class="empty">
+    <h2>No session open</h2>
+    <p>Run <code>/jl editor</code> in-game or in the console. It prints a link that opens this page with your accounts, already decrypted on your side only.</p>
+    <button id="demoBtn" class="btn" type="button">Preview with demo data</button>
+  </div>
+</div>
+
+<div class="bar">
+  <div class="bar-inner">
+    <details class="relay">
+      <summary></summary>
+      <div class="relay-field">
+        <label for="relayUrl">Relay URL</label>
+        <input id="relayUrl" type="url" value="https://bytebin.lucko.me" spellcheck="false">
+      </div>
+    </details>
+    <div id="count" class="count">No pending changes</div>
+    <button id="discardBtn" class="btn" type="button" disabled>Discard</button>
+    <button id="saveBtn" class="btn primary" type="button" disabled>Encrypt &amp; upload</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  const b64uDecode = (s) => {
+    const pad = s.length % 4 === 0 ? '' : '='.repeat(4 - (s.length % 4));
+    const bin = atob(s.replace(/-/g, '+').replace(/_/g, '/') + pad);
+    return Uint8Array.from(bin, c => c.charCodeAt(0));
+  };
+  const b64uEncode = (buf) => {
+    const bytes = new Uint8Array(buf);
+    let bin = '';
+    for (const b of bytes) bin += String.fromCharCode(b);
+    return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  };
+
+  let aesKey = null;
+  let sessionData = null;
+  let demo = false;
+  let edits = new Map();
+  let deletes = new Set();
+
+  const $ = (id) => document.getElementById(id);
+  const statusEl = $('status');
+  const rowsEl = $('rows');
+  const searchEl = $('search');
+  const relayEl = $('relayUrl');
+  const resultEl = $('resultBox');
+  const saveBtn = $('saveBtn');
+  const discardBtn = $('discardBtn');
+  const countEl = $('count');
+
+  function setStatus(text, kind) {
+    $('statusText').textContent = text;
+    statusEl.dataset.kind = kind || 'idle';
+  }
+
+  function el(tag, cls, text) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+
+  // ---------- demo data (only used when ?demo is in the URL or the button is pressed) ----------
+  function demoSession() {
+    const d = (day, h, m) => Date.UTC(2026, 10, day, h, m);
+    const acc = (id, name, uuid, premium, force, hasPassword, hasTotp, last) =>
+      ({ id, name, gameUuid: uuid, premium, forcePasswordChange: force, hasPassword, hasTotp, lastLoginAt: last });
+    return {
+      sessionId: 'demo', page: 1, totalAccounts: 42,
+      accounts: [
+        acc(1, 'CobbleQueen', '3f1c2a7e-91d4-4b0a-8c55-0e7b6a41d9f2', true, false, false, true, d(14, 9, 12)),
+        acc(2, 'mineKrab', 'a07de3b1-5c28-3e6f-b2d1-77c9a04e1b83', false, false, true, false, d(14, 8, 47)),
+        acc(3, 'Frosty', '5b92e0c4-17aa-4d63-9f08-c3d2e61a7b50', true, false, false, false, d(13, 22, 31)),
+        acc(4, 'redstone_rae', 'c4e81f09-62b7-3a15-8d4c-0b9e2f7a6d31', false, true, true, true, d(13, 21, 5)),
+        acc(5, 'Nimbus', '81d6a3f2-40c9-4e7b-a1d5-9f2c8e03b647', true, false, false, true, d(13, 19, 58)),
+        acc(6, 'okapi_', 'e2b05d78-3f14-3c90-b7a6-41d8c5e9f012', false, false, true, false, d(13, 17, 40)),
+        acc(7, 'Tomas_CZ', '0d7f4b95-a8e1-4c26-93b0-5e1a7d2c8f64', null, false, false, false, d(12, 20, 16)),
+        acc(8, 'HexaGon', '9a3c6e12-7d05-3b48-a2f9-6c0e1b5d8a73', false, false, true, true, d(12, 14, 22)),
+        acc(9, 'Lumi', '46f0b2d8-c1a3-4e59-8b76-d09e3a5c1f28', true, false, false, false, d(11, 23, 9)),
+        acc(10, 'driftwood', 'b85e1a40-96c2-3d07-9e4b-2a7f0c6d3e91', false, true, true, false, d(11, 18, 33)),
+      ]
+    };
+  }
+
+  // ---------- load ----------
+  async function init() {
+    const params = new URLSearchParams(location.search);
+    const code = params.get('code');
+    const relay = params.get('relay');
+    if (relay) relayEl.value = relay;
+    else if (location.hostname === '127.0.0.1' || location.hostname === 'localhost') relayEl.value = location.origin;
+    const keyFrag = location.hash ? location.hash.slice(1) : '';
+    if (!code || !keyFrag) {
+      if (window.JL_DEMO || params.has('demo')) { startDemo(); return; }
+      setStatus('Waiting for a session', 'idle');
+      return;
+    }
+    aesKey = await crypto.subtle.importKey('raw', b64uDecode(keyFrag), 'AES-GCM', false, ['encrypt', 'decrypt']);
+    await loadBlob(code);
+  }
+
+  function startDemo() {
+    demo = true;
+    $('demoNote').hidden = false;
+    sessionData = demoSession();
+    resetEdits();
+    setStatus(`Loaded ${sessionData.accounts.length} of ${sessionData.totalAccounts} accounts`, 'ok');
+    render();
+  }
+
+  async function loadBlob(code) {
+    setStatus('Downloading and decrypting', 'busy');
+    const base = relayEl.value.replace(/\/+$/, '');
+    const resp = await fetch(`${base}/${encodeURIComponent(code)}`);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const env = await resp.json();
+    const plain = await crypto.subtle.decrypt(
+      { name: 'AES-GCM', iv: b64uDecode(env.iv) },
+      aesKey,
+      b64uDecode(env.ct)
+    );
+    sessionData = JSON.parse(new TextDecoder().decode(plain));
+    resetEdits();
+    setStatus(`Loaded ${sessionData.accounts.length} of ${sessionData.totalAccounts} accounts`, 'ok');
+    render();
+  }
+
+  function resetEdits() {
+    edits.clear();
+    deletes.clear();
+    resultEl.classList.remove('show');
+    updateBar();
+  }
+
+  // ---------- render ----------
+  function updateFigures() {
+    const a = sessionData.accounts;
+    $('figTotal').textContent = sessionData.totalAccounts;
+    $('figPremium').textContent = a.filter(x => x.premium === true).length + (a.length < sessionData.totalAccounts ? '+' : '');
+    $('figTotp').textContent = a.filter(x => x.hasTotp).length + (a.length < sessionData.totalAccounts ? '+' : '');
+    $('figPage').textContent = sessionData.page;
+    $('figures').hidden = false;
+  }
+
+  function updateBar() {
+    const e = edits.size, d = deletes.size, n = e + d;
+    countEl.textContent = '';
+    if (n === 0) {
+      countEl.textContent = 'No pending changes';
+    } else {
+      const parts = [];
+      if (e) parts.push(`${e} edit${e === 1 ? '' : 's'}`);
+      if (d) parts.push(`${d} deletion${d === 1 ? '' : 's'}`);
+      const b = el('b', null, `${n} pending change${n === 1 ? '' : 's'}`);
+      countEl.append(b, ` · ${parts.join(', ')}`);
+    }
+    saveBtn.disabled = n === 0;
+    discardBtn.disabled = n === 0;
+  }
+
+  function render() {
+    if (!sessionData) return;
+    updateFigures();
+    $('table').hidden = false;
+    $('empty').hidden = true;
+
+    const q = searchEl.value.trim().toLowerCase();
+    rowsEl.textContent = '';
+    for (const acc of sessionData.accounts) {
+      if (q && !acc.name.toLowerCase().includes(q) && !acc.gameUuid.toLowerCase().includes(q)) continue;
+      const cur = edits.get(acc.id) || { id: acc.id, premium: acc.premium, forcePasswordChange: acc.forcePasswordChange };
+      const tr = document.createElement('tr');
+
+      const refresh = () => {
+        const same = cur.premium === acc.premium && cur.forcePasswordChange === acc.forcePasswordChange;
+        if (same) edits.delete(acc.id); else edits.set(acc.id, cur);
+        tr.classList.toggle('changed', !same || deletes.has(acc.id));
+        warnEl.hidden = !(acc.hasPassword === false && cur.premium !== true);
+        updateBar();
+      };
+
+      // account
+      const tdName = document.createElement('td');
+      const nameEl = el('span', 'name', acc.name);
+      const warnEl = el('span', 'tag', 'no password');
+      warnEl.title = 'This account has no password set. Switching it away from Premium will prevent login until a password is set.';
+      const uuidBtn = el('button', 'uuid', acc.gameUuid);
+      uuidBtn.type = 'button';
+      uuidBtn.title = 'Click to copy';
+      uuidBtn.onclick = () => {
+        try { navigator.clipboard.writeText(acc.gameUuid); } catch (e) { /* ignore */ }
+        uuidBtn.textContent = 'Copied';
+        setTimeout(() => { uuidBtn.textContent = acc.gameUuid; }, 900);
+      };
+      tdName.append(nameEl, warnEl, document.createElement('br'), uuidBtn);
+
+      // login mode
+      const tdMode = document.createElement('td');
+      const seg = el('div', 'seg');
+      seg.setAttribute('role', 'radiogroup');
+      seg.setAttribute('aria-label', `Login mode for ${acc.name}`);
+      const options = [['null', 'Unset', ''], ['true', 'Premium', 'premium'], ['false', 'Cracked', 'cracked']];
+      const buttons = options.map(([v, label, cls]) => {
+        const b = el('button', cls, label);
+        b.type = 'button';
+        b.setAttribute('role', 'radio');
+        b.dataset.v = v;
+        b.onclick = () => {
+          cur.premium = v === 'null' ? null : v === 'true';
+          buttons.forEach(x => x.setAttribute('aria-checked', String(x === b)));
+          refresh();
+        };
+        return b;
+      });
+      buttons.forEach(b => b.setAttribute('aria-checked', String(b.dataset.v === String(cur.premium))));
+      seg.append(...buttons);
+      tdMode.appendChild(seg);
+
+      // 2FA
+      const td2fa = el('td', 'hide-sm');
+      const st = el('span', 'state' + (acc.hasTotp ? ' on' : ''));
+      st.append(el('span', 'dot'), acc.hasTotp ? 'Enabled' : 'Off');
+      td2fa.appendChild(st);
+
+      // force reset
+      const tdForce = document.createElement('td');
+      const sw = el('label', 'switch');
+      const chk = document.createElement('input');
+      chk.type = 'checkbox';
+      chk.checked = cur.forcePasswordChange;
+      chk.setAttribute('aria-label', `Force password reset for ${acc.name}`);
+      chk.onchange = () => { cur.forcePasswordChange = chk.checked; refresh(); };
+      sw.append(chk, document.createElement('i'));
+      tdForce.appendChild(sw);
+
+      // last login
+      const tdLast = el('td', 'hide-sm', new Date(acc.lastLoginAt).toISOString().slice(0, 16).replace('T', ' '));
+      tdLast.style.color = 'var(--muted)';
+
+      // delete
+      const tdDel = document.createElement('td');
+      const delBtn = el('button', 'link', 'Delete');
+      delBtn.type = 'button';
+      delBtn.onclick = () => {
+        if (deletes.has(acc.id)) deletes.delete(acc.id); else deletes.add(acc.id);
+        render();
+        updateBar();
+      };
+      if (deletes.has(acc.id)) {
+        tr.classList.add('removed');
+        delBtn.textContent = 'Undo';
+        delBtn.classList.add('undo');
+      }
+      tdDel.appendChild(delBtn);
+
+      tr.append(tdName, tdMode, td2fa, tdForce, tdLast, tdDel);
+      rowsEl.appendChild(tr);
+      refresh();
+    }
+  }
+
+  // ---------- save ----------
+  async function save() {
+    if (!sessionData) return;
+    if (demo) {
+      showResult('Demo mode: nothing was uploaded. In a real session this prints the apply command.', null);
+      return;
+    }
+    if (!aesKey) return;
+    const changes = {
+      sessionId: sessionData.sessionId,
+      updates: Array.from(edits.values()),
+      deleteIds: Array.from(deletes.values())
+    };
+    saveBtn.disabled = true;
+    setStatus('Encrypting and uploading', 'busy');
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const encoded = new TextEncoder().encode(JSON.stringify(changes));
+    const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, aesKey, encoded);
+    const envelope = { v: 1, alg: 'AES-256-GCM', iv: b64uEncode(iv), ct: b64uEncode(ct) };
+    const base = relayEl.value.replace(/\/+$/, '');
+    const resp = await fetch(`${base}/post`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(envelope)
+    });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const out = await resp.json();
+    setStatus('Changes uploaded', 'ok');
+    showResult('Encrypted changes uploaded. Run in-game or in the console:', `/jl applyedits ${out.key}`);
+    updateBar();
+  }
+
+  function showResult(message, command) {
+    resultEl.textContent = '';
+    resultEl.appendChild(el('span', null, message));
+    if (command) {
+      resultEl.appendChild(el('code', null, command));
+      const copy = el('button', 'btn', 'Copy');
+      copy.type = 'button';
+      copy.onclick = () => {
+        try { navigator.clipboard.writeText(command); } catch (e) { /* ignore */ }
+        copy.textContent = 'Copied';
+        setTimeout(() => { copy.textContent = 'Copy'; }, 900);
+      };
+      resultEl.appendChild(copy);
+    }
+    resultEl.classList.add('show');
+  }
+
+  // ---------- wiring ----------
+  searchEl.oninput = render;
+  $('demoBtn').onclick = startDemo;
+  $('loadBtn').onclick = () => {
+    if (demo) { startDemo(); return; }
+    const code = new URLSearchParams(location.search).get('code');
+    if (code) loadBlob(code).catch(e => setStatus('Error: ' + e.message, 'error'));
+  };
+  discardBtn.onclick = () => { resetEdits(); render(); };
+  saveBtn.onclick = () => save().catch(e => { setStatus('Save error: ' + e.message, 'error'); updateBar(); });
+
+  init().catch(e => setStatus('Error: ' + e.message, 'error'));
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>JustLogin — Configuration-Phase Dialog Preview</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 1280px;
+    height: 720px;
+    background: radial-gradient(circle at 20% 20%, #172554 0%, #0f172a 55%, #090d16 100%);
+    color: #e2e8f0;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    padding: 40px 56px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+  }
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+  }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    background: rgba(56, 189, 248, 0.16);
+    border: 1px solid rgba(56, 189, 248, 0.45);
+    color: #7dd3fc;
+  }
+  .caption {
+    font-size: 13px;
+    color: #94a3b8;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1.25fr 0.85fr;
+    gap: 36px;
+    align-items: center;
+    margin-top: 10px;
+  }
+  .dialog-card {
+    background: rgba(15, 23, 42, 0.94);
+    border: 2px solid rgba(148, 163, 184, 0.32);
+    border-radius: 16px;
+    padding: 32px 34px;
+    box-shadow: 0 28px 60px rgba(0, 0, 0, 0.55);
+  }
+  .dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .dialog-title {
+    font-size: 21px;
+    font-weight: 700;
+    color: #38bdf8;
+    white-space: nowrap;
+  }
+  .phase-tag {
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: rgba(16, 185, 129, 0.14);
+    color: #6ee7b7;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+  }
+  .warning-box {
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: #fde68a;
+    margin-bottom: 22px;
+    line-height: 1.45;
+  }
+  .field-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #cbd5e1;
+    margin-bottom: 6px;
+  }
+  .input-box {
+    background: #020617;
+    border: 2px solid #334155;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: ui-monospace, monospace;
+    font-size: 16px;
+    letter-spacing: 3px;
+    color: #f8fafc;
+    margin-bottom: 16px;
+  }
+  .input-box.active {
+    border-color: #38bdf8;
+  }
+  .btn-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .btn-primary {
+    flex: 1;
+    text-align: center;
+    background: linear-gradient(135deg, #06b6d4, #2563eb);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 13px 18px;
+    border-radius: 8px;
+  }
+  .btn-secondary {
+    padding: 13px 18px;
+    border-radius: 8px;
+    border: 1px solid #475569;
+    color: #cbd5e1;
+    font-size: 15px;
+    font-weight: 600;
+    background: #1e293b;
+  }
+  .side-col {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .side-card {
+    background: rgba(30, 41, 59, 0.65);
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    border-radius: 14px;
+    padding: 20px 22px;
+  }
+  .side-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #f8fafc;
+    margin-bottom: 8px;
+  }
+  .side-card p, .side-card li {
+    font-size: 14px;
+    color: #cbd5e1;
+    line-height: 1.5;
+  }
+  .side-card ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .side-card code {
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 13px;
+    color: #7dd3fc;
+    background: rgba(15, 23, 42, 0.8);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #64748b;
+  }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">
+      <span class="pill">Paper 1.21.7–26.x</span>
+      <span>Pre-Spawn Modal Authentication</span>
+    </div>
+    <div class="caption">Illustration (mockup UI), not a screenshot</div>
+  </div>
+
+  <div class="grid">
+    <div class="dialog-card">
+      <div class="dialog-header">
+        <div class="dialog-title">JustLogin · Register Account</div>
+        <span class="phase-tag">AsyncPlayerConnectionConfigureEvent</span>
+      </div>
+      <div class="warning-box">
+        Streaming? Keep your password private before clicking Confirm. You have not spawned into any world yet.
+      </div>
+      <div class="field-label">Username</div>
+      <div class="input-box" style="letter-spacing: 0.4px; color: #94a3b8;">Steve</div>
+      <div class="field-label">Password (min 8 chars)</div>
+      <div class="input-box active">••••••••••••</div>
+      <div class="field-label">Confirm Password</div>
+      <div class="input-box">••••••••••••</div>
+      <div class="btn-row">
+        <div class="btn-primary">Register & Enter World</div>
+        <div class="btn-secondary">Disconnect</div>
+      </div>
+    </div>
+
+    <div class="side-col">
+      <div class="side-card">
+        <h3>Zero Limbo Server Needed</h3>
+        <p>Authentication completes inside Minecraft's native Dialog modal during the Configuration phase — before chunks, inventories, or coordinates are ever sent.</p>
+      </div>
+      <div class="side-card">
+        <h3>Automatic Client Fallback</h3>
+        <ul>
+          <li>• Java 1.21.7–26.x -> Native modal Dialog</li>
+          <li>• Bedrock (Floodgate) -> <code>/register</code> &amp; <code>/login</code></li>
+          <li>• Older clients (<1.21.7 via ViaVersion) -> Safe Play lockdown</li>
+        </ul>
+      </div>
+      <div class="side-card">
+        <h3>2FA Ready</h3>
+        <p>Players with TOTP enabled seamlessly transition to a 6-digit authenticator verification modal before spawn.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>JustLogin · Modern Authentication</span>
+    <span>justlogin.net</span>
+  </div>
+</body>
+</html>

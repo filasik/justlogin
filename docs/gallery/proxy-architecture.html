@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>JustLogin — Proxy &amp; Immutable UUID Architecture</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 1280px;
+    height: 720px;
+    background: radial-gradient(circle at 80% 15%, #164e63 0%, #0f172a 55%, #090d16 100%);
+    color: #f1f5f9;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    padding: 40px 56px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+  }
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .title { font-size: 22px; font-weight: 700; }
+  .title span { color: #2dd4bf; }
+  .caption { font-size: 13px; color: #94a3b8; }
+  .flow {
+    display: grid;
+    grid-template-columns: 230px 92px 320px 118px 345px;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 12px;
+  }
+  .box {
+    background: rgba(15, 23, 42, 0.9);
+    border: 2px solid rgba(148, 163, 184, 0.28);
+    border-radius: 16px;
+    padding: 22px 22px;
+    box-shadow: 0 22px 45px rgba(0, 0, 0, 0.45);
+  }
+  .box.proxy { border-color: #38bdf8; }
+  .box.paper { border-color: #2dd4bf; }
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 999px;
+    margin-bottom: 10px;
+    background: rgba(56, 189, 248, 0.16);
+    color: #7dd3fc;
+  }
+  .box.paper .badge {
+    background: rgba(45, 212, 191, 0.16);
+    color: #5eead4;
+  }
+  .box h3 { font-size: 18px; margin-bottom: 10px; }
+  .box ul { list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; color: #cbd5e1; line-height: 1.45; }
+  .arrow {
+    text-align: center;
+    font-family: ui-monospace, monospace;
+    color: #38bdf8;
+    font-size: 26px;
+    font-weight: 700;
+  }
+  .arrow span {
+    display: block;
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 4px;
+    line-height: 1.25;
+  }
+  .bottom-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .banner-note {
+    background: rgba(30, 41, 59, 0.65);
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    border-radius: 12px;
+    padding: 18px 22px;
+  }
+  .banner-note h4 { font-size: 15px; color: #5eead4; margin-bottom: 6px; }
+  .banner-note p { font-size: 13.5px; color: #cbd5e1; line-height: 1.5; }
+  .banner-note code { font-family: ui-monospace, monospace; color: #7dd3fc; }
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #64748b;
+  }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="title"><span>JustLogin Network</span> · Immutable UUIDs &amp; Signed Forwarding</div>
+    <div class="caption">Illustration (mockup architecture diagram), not a screenshot</div>
+  </div>
+
+  <div class="flow">
+    <div class="box">
+      <div class="badge" style="background:rgba(148,163,184,0.2);color:#e2e8f0;">Minecraft Client</div>
+      <h3>Cracked, Mojang or Bedrock</h3>
+      <ul>
+        <li>• Java 1.21.7–26.x (Dialog UI)</li>
+        <li>• Legacy &lt; 1.21.7 fallback</li>
+        <li>• Floodgate Bedrock bypass</li>
+      </ul>
+    </div>
+
+    <div class="arrow">➜<span>PreLogin</span></div>
+
+    <div class="box proxy">
+      <div class="badge">Velocity / BungeeCord</div>
+      <h3>Proxy Negotiation</h3>
+      <ul>
+        <li>• Lookup account in shared DB</li>
+        <li>• Force online-mode for <code>/premium</code> players</li>
+        <li>• Rewrite profile UUID to permanent <code>game_uuid</code> (keep Mojang skins)</li>
+      </ul>
+    </div>
+
+    <div class="arrow">➜<span>HMAC<br>justlogin:auth</span></div>
+
+    <div class="box paper">
+      <div class="badge">Paper / Folia Backend</div>
+      <h3>Dialog &amp; Fail-Closed Gate</h3>
+      <ul>
+        <li>• Verifies HMAC + timestamp + nonce</li>
+        <li>• Auto-logins verified premium users</li>
+        <li>• Shows Dialog / 2FA modal for cracked accounts before world spawn</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="bottom-row">
+    <div class="banner-note">
+      <h4>Immutable Player Identity Across Switches</h4>
+      <p>Switching between <code>/premium</code> and <code>/cracked</code> or changing a Mojang username never breaks inventories, islands, or permissions — <code>game_uuid</code> stays fixed in MariaDB/SQLite.</p>
+    </div>
+    <div class="banner-note">
+      <h4>Encrypted Web Editor &amp; Importers</h4>
+      <p>Admins inspect accounts via <code>/jl editor</code> (AES-256-GCM key kept in browser fragment) and import legacy databases with <code>/jl import authme|fastlogin</code>.</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>JustLogin · Shared core across Paper, Velocity &amp; BungeeCord</span>
+    <span>justlogin.net</span>
+  </div>
+</body>
+</html>

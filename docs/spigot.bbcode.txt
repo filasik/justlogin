@@ -1,0 +1,81 @@
+[CENTER][IMG]https://raw.githubusercontent.com/filasik/justLogin/main/docs/assets/banner.png[/IMG]
+
+[B][SIZE=6][COLOR=#38bdf8]Just[/COLOR][COLOR=#2dd4bf]Login[/COLOR][/SIZE][/B]
+[SIZE=4]Modern Authentication for Paper 1.21.7–26.x, Folia, Velocity & BungeeCord[/SIZE]
+[SIZE=2][COLOR=#9ca3af]justlogin.net · Built alongside JustPolls & JustAuction[/COLOR][/SIZE][/CENTER]
+
+[B]JustLogin[/B] authenticates players cleanly using Minecraft 1.21.7+ [B]Configuration-phase Paper Dialogs[/B] before they ever spawn in a world — alongside Argon2id hashing, standalone & proxy [B]/premium[/B] auto-login, RFC 6238 TOTP 2FA, immutable server UUIDs, AuthMe/FastLogin importers, and an AES-256-GCM encrypted Web Editor.
+
+[CENTER][IMG]https://raw.githubusercontent.com/filasik/justLogin/main/docs/gallery/ingame-register-dialog.png[/IMG]
+[SIZE=2][I]In-game screenshot: Native Configuration-phase Paper Dialog modal shown before world spawn.[/I][/SIZE][/CENTER]
+
+[B]Highlights:[/B]
+[LIST]
+[*][B]Native Modal Dialogs (1.21.7+)[/B] — Streamlined single-password or confirm-password Dialog mode before world spawn, optional Floodgate Cumulus Bedrock forms, and <1.21.7 command fallback.
+[*][B]Standalone & Proxy /premium (Permanent game_uuid)[/B] — Switch /premium or /cracked on standalone Paper (zero dependencies — no ProtocolLib or PacketEvents needed) or Velocity/BungeeCord (with proxy.auth-servers lockdown) without losing player inventories, claims, or skins.
+[*][B]Built-In Cracked & Custom Skins (/skin)[/B] — Optionally restore matching Mojang skins automatically by username for offline/cracked players (strictly cosmetic) and change skins in-game with /skin <player|reset> and /jl skin with instant profile refresh and DB persistence.
+[*][B]Argon2id + Legacy Rehash[/B] — Bounded async worker pool protects TPS while automatically upgrading AuthMe SHA-256/512, BCrypt, and PBKDF2 hashes on login.
+[*][B]2FA, Captcha & SMTP Email Recovery[/B] — RFC 6238 TOTP 2FA + 8 single-use backup codes, /captcha anti-bot challenges, and zero-dependency SMTP recovery (/email).
+[*][B]Security First[/B] — Log4j2 password redaction, isolated account/IP rate-limit backoff, HMAC-signed plugin messaging, fail-closed proxy checks, and IP-bound sessions off by default.
+[*][B]Encrypted Web Editor, 1-Click Auto-Migration & Admin GUI[/B] — /jl editor hosted at https://justlogin.net (or 127.0.0.1 loopback HTTP), 1-click /jl import for AuthMe, FastLogin, LibreLogin / LibrePremium, LoginSecurity, nLogin, OpeNLogin, LimboAuth & Authy, /jl gui paginated browser, /jl rename, /jl merge, granular justlogin.admin.* perms, plus Developer API.
+[*][B]Folia & Multi-Language[/B] — Built purely on Paper region/entity/async schedulers with English (en), Czech (cs), and Slovak (sk) built in.
+[/LIST]
+
+[CENTER][IMG]https://raw.githubusercontent.com/filasik/justLogin/main/docs/gallery/ingame-premium-armed.png[/IMG]
+[IMG]https://raw.githubusercontent.com/filasik/justLogin/main/docs/gallery/ingame-premium-verified.png[/IMG]
+[SIZE=2][I]In-game screenshots: Arming /premium and reconnecting with a verified Mojang session while keeping the exact server UUID.[/I][/SIZE][/CENTER]
+
+[SPOILER="Architecture & Feature Previews"]
+[CENTER][IMG]https://raw.githubusercontent.com/filasik/justLogin/main/docs/gallery/web-editor.png[/IMG]
+[IMG]https://raw.githubusercontent.com/filasik/justLogin/main/docs/gallery/ingame-2fa-setup.png[/IMG]
+[IMG]https://raw.githubusercontent.com/filasik/justLogin/main/docs/gallery/ingame-2fa-verify.png[/IMG]
+[IMG]https://raw.githubusercontent.com/filasik/justLogin/main/docs/gallery/configuration-dialog.png[/IMG]
+[IMG]https://raw.githubusercontent.com/filasik/justLogin/main/docs/gallery/proxy-architecture.png[/IMG]
+[IMG]https://raw.githubusercontent.com/filasik/justLogin/main/docs/gallery/security-and-console.png[/IMG][/CENTER]
+[/SPOILER]
+
+[SPOILER="Commands & Permissions"]
+[B]Player Commands:[/B]
+[LIST]
+[*]/register <pw> <pw> (/reg), /login <pw> (/l) — Cracked auth ([I]justlogin.use[/I])
+[*]/logout, /changepassword (/changepass, /cp), /unregister, /captcha <code> — Account, session & captcha ([I]justlogin.use[/I])
+[*]/email <set|clear|recover> — Email binding & SMTP recovery ([I]justlogin.email[/I])
+[*]/2fa <setup|confirm|disable|verify> — TOTP two-factor authentication ([I]justlogin.2fa[/I])
+[*]/premium, /cracked [pw] — Switch Mojang/offline verification on standalone Paper or proxies ([I]justlogin.premium[/I])
+[*]/skin <player|reset> (/skins) — Change or reset your persistent player skin ([I]justlogin.skin[/I])
+[/LIST]
+
+[B]Admin & Editor Commands:[/B]
+[LIST]
+[*]/justlogin reload (/jl, /auth), status, audit, unregister, changepassword (changepass), forcechangepassword (forcepw), reset2fa, setpremium, rename, merge, gui, import, skin — Granular [I]justlogin.admin.*[/I]
+[*]/jl editor [page], /jl applyedits <code|confirm> — AES-256-GCM Web Editor ([I]justlogin.editor[/I])
+[/LIST]
+[/SPOILER]
+
+[SPOILER="Security Defaults"]
+[CODE]
+locale: en
+update-check: true
+metrics: true
+login:
+  ui: dialog                  # native modal in 1.21.7+; fallback: command
+  dialog-single-password: true
+sessions:
+  enabled: false              # opt-in HMAC IP-bound auto-relogin
+premium:
+  standalone-enabled: true    # direct Mojang challenge on standalone Paper (no ProtocolLib needed)
+  auto-detect-mojang: false
+skins:
+  enabled: true
+  restore-cracked-by-name: true
+  command-enabled: true
+  cooldown-seconds: 60
+proxy:
+  enabled: false              # set true + matching >=16-char shared-secret behind Velocity/Bungee
+storage:
+  type: sqlite                # or mariadb for multi-server proxy networks
+[/CODE]
+[/SPOILER]
+
+[CENTER][SIZE=3]Website: [URL='https://justlogin.net']justlogin.net[/URL] · Source & Support: [URL='https://github.com/filasik/justLogin']GitHub[/URL][/SIZE][/CENTER]
+[CENTER][SIZE=2][COLOR=#9ca3af]JustLogin is free and every security feature stays free. Voluntary donations (no in-game perks): [URL='https://www.paypal.com/donate/?hosted_button_id=94D2D46EHKU5S']Donate via PayPal[/URL][/COLOR][/SIZE][/CENTER]
