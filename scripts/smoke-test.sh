@@ -23,6 +23,15 @@ cp "$JAR" "$WORK_DIR/plugins/JustLogin.jar"
 rm -rf paper/run/plugins/JustLogin* paper/run/logs/latest.log 2>/dev/null || true
 mkdir -p paper/run/plugins
 
+# Standalone /premium hook only activates on offline-mode servers (online-mode=false), which is what
+# the banner check below expects. A fresh CI server defaults to online-mode=true, so force it here.
+PROPS="paper/run/server.properties"
+if [[ -f "$PROPS" ]] && grep -q '^online-mode=' "$PROPS"; then
+  sed -i.bak 's/^online-mode=.*/online-mode=false/' "$PROPS" && rm -f "$PROPS.bak"
+else
+  echo "online-mode=false" >> "$PROPS"
+fi
+
 # Pick a free TCP port so smoke tests never collide with another local Minecraft server
 SMOKE_PORT="$(python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1", 0)); print(s.getsockname()[1]); s.close()')"
 
