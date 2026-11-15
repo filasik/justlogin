@@ -151,13 +151,13 @@ JustLogin only talks to the following services. Nothing else is contacted, and n
 
 ### Standalone Paper Server
 
-1. Drop `JustLogin-1.0.0.jar` into `plugins/` on a **Paper `1.21.7–26.x`** server (`Java 21+`) and start the server.
+1. Drop `JustLogin-1.0.1.jar` into `plugins/` on a **Paper `1.21.7–26.x`** server (`Java 21+`) and start the server.
 2. On first boot, `JustLoginLoader` downloads runtime libraries (`libraries.txt`), generates `plugins/JustLogin/secrets.key`, initializes `plugins/JustLogin/data/justlogin.db` (SQLite), and extracts `messages_en.yml`, `messages_cs.yml`, and `messages_sk.yml`.
 3. Everything works out of the box — including native Configuration-phase Dialogs (`1.21.7+`) and standalone `/premium` verification. Adjust `plugins/JustLogin/config.yml` anytime and run `/jl reload`.
 
 ### Velocity or BungeeCord Network
 
-1. Place `JustLogin-Velocity-1.0.0.jar` on Velocity (or `JustLogin-Bungee-1.0.0.jar` on BungeeCord) and `JustLogin-1.0.0.jar` on every Paper backend.
+1. Place `JustLogin-Velocity-1.0.1.jar` on Velocity (or `JustLogin-Bungee-1.0.1.jar` on BungeeCord) and `JustLogin-1.0.1.jar` on every Paper backend.
 2. Generate a random `proxy.shared-secret` (at least 16 characters) and set the **exact same secret** in both proxy and Paper `config.yml`.
 3. Configure the **same MariaDB database** under `storage` in both proxy and Paper `config.yml`.
 4. Set `proxy.enabled: true` and `proxy.mode: velocity` (or `bungee`) on Paper, matching Paper's native forwarding (`config/paper-global.yml` for Velocity modern forwarding or `spigot.yml` for BungeeCord).

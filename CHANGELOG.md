@@ -7,19 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-- **Built-in Skin Management & Schema v3 (`Migrations` v3, Config v5)**:
-  - `MojangSkinClient` fetches signed Mojang skin textures (`value` + `signature` via `sessionserver.mojang.com/...?unsigned=false`) with bounded TTL caching and fail-open timeouts so Mojang outages never block logins.
-  - Persistent custom skin columns on `justlogin_accounts` (`skin_owner`, `skin_value`, `skin_signature`, `skin_updated_at`) preserved across `/jl merge` and `/jl rename`.
-  - Configurable `skins:` section (`enabled`, `command-enabled`, `cooldown-seconds`, `cache-seconds`, plus a restore-by-username toggle) automatically restores matching Mojang skins by username for password-authenticated joins (strictly cosmetic; never grants `/premium`) across standalone Paper, Velocity (`GameProfileRequestEvent`), and Paper backends.
-  - In-game `/skin <player|reset>` (alias `/skins`, `justlogin.skin`, cooldown bypass `justlogin.skin.bypasscooldown`) and admin `/jl skin <player> <target|reset>` (`justlogin.admin.skin`) updating live `PlayerProfile` on Paper/Folia entity threads with DB persistence and `CommandDoc`/`HelpRenderer` documentation in `en`, `cs`, and `sk`.
-- **1-Click Legacy Auto-Migration Hardening**: expanded `MigrationScanner` + importers for AuthMe, FastLogin, LibreLogin (`librepremium_data`, split `BCrypt-2A`/`Argon-2ID`), LoginSecurity (`ls_players`), nLogin (`$SHA512$` reversed format + `mojang_id`), OpeNLogin (`openlogin`), LimboAuth (`AUTH`), and Authy (`players`), with `--dry-run` preview and audit reports.
-- **Interactive `/jl help`**: paginated help and detailed command cards (`CommandDoc`, `HelpRenderer`, `HelpCommandCompletenessTest`) filtering by permission and active server features across `en`/`cs`/`sk`.
-- **Landing page** (`docs/index.html`, served at `justlogin.net/`; the web editor lives at `justlogin.net/editor/`). Links to Modrinth, Hangar and GitHub, lists the private security contact `security@justlogin.net`, and forwards legacy `/?code=…#key` editor links to `/editor/`.
-
-### Changed
-- **Web Editor redesign** (`docs/editor/index.html`, mirrored in `editor/src/main/resources/web-editor/`): calmer light/dark theme, segmented login-mode control, switches, summary figures, pending-changes bar with Discard, copyable apply command, collapsible relay setting and responsive layout. Same encryption flow and strict CSP; adds a `?demo` preview with made-up data.
-
 ## [1.0.1] - 2026-11-15
 
 ### Changed
@@ -40,6 +27,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Slovak Localization**: bundled `messages_sk.yml` (`locale: sk`) verified for key parity alongside `en` and `cs`.
 - **Developer API**: `JustLoginAPI` registered in Bukkit `ServicesManager`, secret-free `AccountSnapshot`, and Bukkit events (`PlayerAuthenticatedEvent`, `PlayerRegisteredEvent`, `PlayerLoggedOutEvent`, `PlayerPremiumVerifiedEvent`).
 - **Optional Local Loopback HTTP Editor**: `editor.local-http.enabled` starts a `127.0.0.1`-only embedded `HttpServer` serving the static Web Editor UI and `/post` relay with CSP headers as a self-contained alternative to external Bytebin instances.
+
+- **Built-in Skin Management & Schema v3 (`Migrations` v3, Config v5)**:
+  - `MojangSkinClient` fetches signed Mojang skin textures (`value` + `signature` via `sessionserver.mojang.com/...?unsigned=false`) with bounded TTL caching and fail-open timeouts so Mojang outages never block logins.
+  - Persistent custom skin columns on `justlogin_accounts` (`skin_owner`, `skin_value`, `skin_signature`, `skin_updated_at`) preserved across `/jl merge` and `/jl rename`.
+  - Configurable `skins:` section (`enabled`, `command-enabled`, `cooldown-seconds`, `cache-seconds`, plus a restore-by-username toggle) automatically restores matching Mojang skins by username for password-authenticated joins (strictly cosmetic; never grants `/premium`) across standalone Paper, Velocity (`GameProfileRequestEvent`), and Paper backends.
+  - In-game `/skin <player|reset>` (alias `/skins`, `justlogin.skin`, cooldown bypass `justlogin.skin.bypasscooldown`) and admin `/jl skin <player> <target|reset>` (`justlogin.admin.skin`) updating live `PlayerProfile` on Paper/Folia entity threads with DB persistence and `CommandDoc`/`HelpRenderer` documentation in `en`, `cs`, and `sk`.
+- **1-Click Legacy Auto-Migration Hardening**: expanded `MigrationScanner` + importers for AuthMe, FastLogin, LibreLogin (`librepremium_data`, split `BCrypt-2A`/`Argon-2ID`), LoginSecurity (`ls_players`), nLogin (`$SHA512$` reversed format + `mojang_id`), OpeNLogin (`openlogin`), LimboAuth (`AUTH`), and Authy (`players`), with `--dry-run` preview and audit reports.
+- **Interactive `/jl help`**: paginated help and detailed command cards (`CommandDoc`, `HelpRenderer`, `HelpCommandCompletenessTest`) filtering by permission and active server features across `en`/`cs`/`sk`.
+- **Landing page** (`docs/index.html`, served at `justlogin.net/`; the web editor lives at `justlogin.net/editor/`). Links to Modrinth, Hangar and GitHub, lists the private security contact `security@justlogin.net`, and forwards legacy `/?code=…#key` editor links to `/editor/`.
+
+### Changed
+- **Web Editor redesign** (`docs/editor/index.html`, mirrored in `editor/src/main/resources/web-editor/`): calmer light/dark theme, segmented login-mode control, switches, summary figures, pending-changes bar with Discard, copyable apply command, collapsible relay setting and responsive layout. Same encryption flow and strict CSP; adds a `?demo` preview with made-up data.
 
 ### Security
 - Threat model regression suite (`ThreatModelMatrixTest`) covering bounded hashing DoS (`HASHING_BUSY`), TOTP step anti-replay & single-use backup codes, HMAC `BACKEND_AUTH_OK` replay rejection, pending `/premium` rollback, and SQLite v1->v2 migration integrity.

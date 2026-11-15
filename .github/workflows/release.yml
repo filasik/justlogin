@@ -12,7 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
-      HANGAR_API_TOKEN: ${{ secrets.HANGAR_API_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -37,6 +36,3 @@ jobs:
       - name: Modrinth (one version per platform)
         if: env.MODRINTH_TOKEN != ''
         run: ./gradlew :paper:modrinth :velocity:modrinth :bungee:modrinth --no-daemon
-      - name: Hangar (one version, three platforms)
-        if: env.HANGAR_API_TOKEN != ''
-        run: ./gradlew publishPluginPublicationToHangar --no-daemon
