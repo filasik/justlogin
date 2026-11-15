@@ -6,6 +6,17 @@ plugins {
     id("io.papermc.hangar-publish-plugin") version "0.1.4"
 }
 
+// Changelog text of the current version only (the "## [<version>]" section of CHANGELOG.md)
+val releaseNotes: Provider<String> = providers.fileContents(layout.projectDirectory.file("CHANGELOG.md")).asText.map { text ->
+    val version = project.property("pluginVersion") as String
+    val section = text.lineSequence()
+        .dropWhile { !it.startsWith("## [$version]") }
+        .drop(1).takeWhile { !it.startsWith("## ") }
+        .joinToString("\n").trim()
+    section.ifEmpty { throw GradleException("CHANGELOG.md has no section '## [$version]'") }
+}
+extra["releaseNotes"] = releaseNotes
+
 subprojects {
     apply(plugin = "java")
 
@@ -60,7 +71,7 @@ hangarPublish {
         version.set(project.property("pluginVersion") as String)
         id.set(project.property("hangarId") as String)
         channel.set("Release") // must exist on Hangar
-        changelog.set(providers.fileContents(layout.projectDirectory.file("CHANGELOG.md")).asText)
+        changelog.set(releaseNotes)
         apiKey.set(providers.environmentVariable("HANGAR_API_TOKEN"))
         platforms {
             register(io.papermc.hangarpublishplugin.model.Platforms.PAPER) {

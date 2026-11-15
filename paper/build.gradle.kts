@@ -100,6 +100,7 @@ modrinth {
     uploadFile.set(tasks.shadowJar)
     gameVersions.addAll("1.21.7", "1.21.8", "1.21.11", "26.1.2", minecraftVersionProp)
     loaders.addAll("paper", "purpur", "folia")
-    changelog = providers.fileContents(rootProject.layout.projectDirectory.file("CHANGELOG.md")).asText
+    @Suppress("UNCHECKED_CAST")
+    changelog = rootProject.extra["releaseNotes"] as Provider<String>
     syncBodyFrom = providers.fileContents(rootProject.layout.projectDirectory.file("docs/modrinth.md")).asText
 }
