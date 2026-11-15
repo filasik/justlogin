@@ -187,7 +187,7 @@ done
 # Web editor: render the real docs/editor/index.html with demo data (light theme, 1280x720).
 EDITOR_TMP="$(mktemp -d /tmp/justlogin-editor-XXXXXX)"
 sed -e 's#<head>#<head><script>window.JL_DEMO=true;document.documentElement.dataset.theme="light";</script>#' \
-    -e 's|</body>|<script>(() => { const r = document.querySelectorAll("#rows tr"); r[2].querySelector("button.cracked").click(); r[0].querySelector(".switch input").click(); })();</script></body>|' \
+    -e 's|</body>|<script>(() => { const r = document.querySelectorAll("#rows tr"); r[2].querySelector("button.pwlogin").click(); r[0].querySelector(".switch input").click(); })();</script></body>|' \
   "$ROOT/docs/editor/index.html" > "$EDITOR_TMP/index.html"
 render_html "$EDITOR_TMP/index.html" "$GALLERY/web-editor.png" 1280 720
 rm -rf "$EDITOR_TMP"

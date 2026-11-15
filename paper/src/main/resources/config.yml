@@ -6,7 +6,7 @@
 
 # Config format version. Do not change: when you update the plugin, options added in the new version
 # are merged into this file automatically (your values stay, a backup config.yml.bak-v<n> is saved first).
-config-version: 5
+config-version: 6
 
 # Language of all player-facing messages: en, cs, sk.
 # The files plugins/JustLogin/messages_<locale>.yml are yours to edit; missing keys fall back to built-in English.
@@ -94,11 +94,11 @@ totp:
   window-steps: 1
 
 premium:
-  # Enable verified Mojang auto-login (/premium, /cracked, encryption challenge & Mojang skins)
+  # Enable verified Mojang auto-login (/premium, /unpremium, encryption challenge & Mojang skins)
   # directly on standalone Paper (online-mode=false) without requiring Velocity or BungeeCord.
   # Automatically stays idle when server.properties online-mode=true or proxy.enabled=true.
   standalone-enabled: true
-  # Check Mojang API on first unseen join (off by default per threat model #3: protects cracked/offline accounts)
+  # Check Mojang API on first unseen join (off by default per threat model #3: protects password-registered accounts)
   auto-detect-mojang: false
   mojang-cache-seconds: 300
   # Include player IP in Mojang sessionserver hasJoined verification (keep false behind NAT / local tunnels)
@@ -109,8 +109,8 @@ premium:
 skins:
   # Enable built-in JustLogin skin restoration and /skin management (works standalone & behind proxies)
   enabled: true
-  # Automatically fetch and apply the matching Mojang skin by username for cracked/offline players (cosmetic only; never grants /premium)
-  restore-cracked-by-name: true
+  # Automatically fetch and apply the matching Mojang skin by username for password-authenticated players (cosmetic only; never grants /premium)
+  restore-by-name: true
   # Allow authenticated players to change skins in-game with /skin <player|reset>
   command-enabled: true
   # Cooldown in seconds between /skin changes per player (0 disables cooldown)

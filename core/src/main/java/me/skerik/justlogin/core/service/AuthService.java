@@ -703,7 +703,7 @@ public final class AuthService {
     }
 
     /**
-     * P0-2 fix: {@code /cracked <newPassword>} is ONLY permitted when the account does not yet have a password
+     * P0-2 fix: {@code /unpremium <newPassword>} is ONLY permitted when the account does not yet have a password
      * (e.g., an auto-registered premium account switching to password login). If the account already has a password,
      * returns {@link Status#PASSWORD_ALREADY_SET} so an attacker cannot overwrite the password without knowing the old one.
      */

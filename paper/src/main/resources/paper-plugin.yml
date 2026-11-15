@@ -26,7 +26,7 @@ permissions:
     description: Manage TOTP two-factor authentication (/2fa)
     default: true
   justlogin.premium:
-    description: Toggle Mojang online-mode auto-login on proxied networks (/premium, /cracked)
+    description: Toggle Mojang online-mode auto-login on proxied networks (/premium, /unpremium)
     default: true
   justlogin.email:
     description: Manage account recovery email and reset forgotten passwords (/email)
@@ -59,7 +59,7 @@ permissions:
     description: Clear a player's 2FA enrollment (/jl reset2fa)
     default: op
   justlogin.admin.setpremium:
-    description: Override a player's premium/cracked flag (/jl setpremium)
+    description: Override a player's premium/password flag (/jl setpremium)
     default: op
   justlogin.admin.forcepw:
     description: Toggle forced password change on next login (/jl forcepw)

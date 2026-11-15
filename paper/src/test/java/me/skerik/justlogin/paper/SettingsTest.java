@@ -35,9 +35,22 @@ final class SettingsTest {
         assertEquals(8, s.core().minPasswordLength());
         assertEquals(19456, s.core().argon2MemoryKib());
         assertTrue(s.skinsEnabled());
-        assertTrue(s.skinsRestoreCrackedByName());
+        assertTrue(s.skinsRestoreByName());
         assertTrue(s.skinsCommandEnabled());
         assertEquals(60L, s.skinCooldownSeconds());
         assertEquals(600L, s.skinsCacheSeconds());
+    }
+
+    @Test
+    void skinRestoreOptionFallsBackToLegacyKeyWhenNewKeyIsMissing() throws Exception {
+        YamlConfiguration cfg = new YamlConfiguration();
+        try (var in = getClass().getResourceAsStream("/config.yml")) {
+            cfg.load(new InputStreamReader(in, StandardCharsets.UTF_8));
+        }
+        cfg.set("skins.restore-by-name", null);
+        cfg.set("skins.restore-cracked-by-name", false);
+
+        Settings s = Settings.load(cfg, Path.of("/tmp/justlogin-test"));
+        assertFalse(s.skinsRestoreByName(), "admin's old value must be honoured when only the legacy key exists");
     }
 }

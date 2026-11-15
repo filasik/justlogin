@@ -212,9 +212,9 @@ public final class CommandDoc {
                     false
             ),
             new Entry(
-                    "cracked",
-                    "/cracked",
-                    "cracked",
+                    "unpremium",
+                    "/unpremium",
+                    "unpremium",
                     Section.PREMIUM,
                     "justlogin.premium",
                     List.of(),

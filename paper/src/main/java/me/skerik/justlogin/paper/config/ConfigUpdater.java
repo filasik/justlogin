@@ -25,7 +25,8 @@ public final class ConfigUpdater {
             "updates.check", "update-check",
             "database", "storage",
             "proxy.auto-detect-mojang", "premium.auto-detect-mojang",
-            "proxy.mojang-cache-seconds", "premium.mojang-cache-seconds"
+            "proxy.mojang-cache-seconds", "premium.mojang-cache-seconds",
+            "skins.restore-cracked-by-name", "skins.restore-by-name"
     );
 
     private ConfigUpdater() {

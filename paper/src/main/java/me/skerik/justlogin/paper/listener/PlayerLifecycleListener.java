@@ -158,7 +158,7 @@ public final class PlayerLifecycleListener implements Listener {
                 if (acc != null && acc.hasCustomSkin()) {
                     SkinCommands.applyProfileTextures(profile, acc.skinValue(), acc.skinSignature());
                     event.setPlayerProfile(profile);
-                } else if (ctx.settings().skinsRestoreCrackedByName()
+                } else if (ctx.settings().skinsRestoreByName()
                         && !floodgatePre
                         && !SkinCommands.hasTextures(profile)) {
                     MojangSkinClient.SkinLookupResult skinRes = ctx.skinClient().fetchByUsername(name)

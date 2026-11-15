@@ -63,6 +63,18 @@ final class ConfigUpdaterTest {
     }
 
     @Test
+    void migrateKeepsAdminValueWhenSkinRestoreOptionIsRenamed() {
+        YamlConfiguration user = new YamlConfiguration();
+        user.set("config-version", 5);
+        user.set("skins.restore-cracked-by-name", false);
+
+        int moved = ConfigUpdater.migrate(user, ConfigUpdater.RENAMES);
+        assertEquals(1, moved);
+        assertFalse(user.getBoolean("skins.restore-by-name"), "admin's value must be preserved");
+        assertFalse(user.contains("skins.restore-cracked-by-name"));
+    }
+
+    @Test
     void mergeUpgradesV2ConfigToV3WithEmailCaptchaBedrockAndLocalEditor() throws Exception {
         YamlConfiguration defaults = new YamlConfiguration();
         try (var in = getClass().getResourceAsStream("/config.yml")) {
@@ -76,7 +88,7 @@ final class ConfigUpdaterTest {
 
         int added = ConfigUpdater.merge(v2, defaults);
         assertTrue(added > 5);
-        assertEquals(5, v2.getInt("config-version"));
+        assertEquals(6, v2.getInt("config-version"));
         assertEquals("sk", v2.getString("locale"));
         assertFalse(v2.getBoolean("premium.standalone-enabled"));
         assertTrue(v2.getBoolean("login.dialog-single-password"));
@@ -85,7 +97,7 @@ final class ConfigUpdaterTest {
         assertFalse(v2.getBoolean("email.enabled"));
         assertFalse(v2.getBoolean("editor.local-http.enabled"));
         assertTrue(v2.getBoolean("skins.enabled"));
-        assertTrue(v2.getBoolean("skins.restore-cracked-by-name"));
+        assertTrue(v2.getBoolean("skins.restore-by-name"));
         assertTrue(v2.getBoolean("skins.command-enabled"));
         assertEquals(60, v2.getInt("skins.cooldown-seconds"));
     }

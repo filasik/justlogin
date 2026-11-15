@@ -186,7 +186,7 @@ public final class AuthCommands {
                 List.of());
 
         commands.register(
-                Commands.literal("cracked")
+                Commands.literal("unpremium")
                         .requires(s -> !(s.getSender() instanceof Player) || s.getSender().hasPermission("justlogin.premium"))
                         .executes(c -> handleCracked(c, null))
                         .then(Commands.argument("password", StringArgumentType.greedyString())
@@ -198,7 +198,7 @@ public final class AuthCommands {
                                 })
                                 .executes(c -> handleCracked(c, StringArgumentType.getString(c, "password"))))
                         .build(),
-                "Switch back to offline password authentication",
+                "Switch back to password authentication",
                 List.of());
 
         commands.register(

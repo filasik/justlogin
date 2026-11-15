@@ -129,7 +129,7 @@ public final class SkinCommands {
                 .thenCompose(v -> ctx.audit().record(now, actor, auditAction, account.lastName(), null))
                 .thenCompose(v -> {
                     boolean restoreDefault = ctx.settings().skinsEnabled()
-                            && (ctx.settings().skinsRestoreCrackedByName() || account.isPremiumConfirmed());
+                            && (ctx.settings().skinsRestoreByName() || account.isPremiumConfirmed());
                     if (!restoreDefault) {
                         return java.util.concurrent.CompletableFuture.completedFuture(null);
                     }

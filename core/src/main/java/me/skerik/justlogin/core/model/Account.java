@@ -5,7 +5,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Immutable snapshot of an account row. {@link #gameUuid()} is assigned once on creation and never changes,
- * even when toggling {@code /premium}/{@code /cracked} or when a Mojang account changes its username.
+ * even when toggling {@code /premium}/{@code /unpremium} or when a Mojang account changes its username.
  */
 public record Account(
         long id,

@@ -27,7 +27,7 @@ final class VelocityConfigTest {
         assertEquals("en", cfg.locale());
         assertFalse(cfg.core().premiumAutoDetect());
         assertTrue(cfg.core().skinsEnabled());
-        assertTrue(cfg.core().skinsRestoreCrackedByName());
+        assertTrue(cfg.core().skinsRestoreByName());
         assertEquals(600L, cfg.core().skinsCacheSeconds());
         assertTrue(cfg.metrics());
         assertFalse(cfg.isSecretValid(), "Default placeholder secret must fail validation");

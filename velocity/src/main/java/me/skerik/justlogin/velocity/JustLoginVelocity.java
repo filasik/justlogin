@@ -58,7 +58,7 @@ import org.bstats.velocity.Metrics;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
-/** Velocity proxy entrypoint for JustLogin (online/cracked negotiation, immutable {@code game_uuid}, signed forwarding). */
+/** Velocity proxy entrypoint for JustLogin (Mojang online/password negotiation, immutable {@code game_uuid}, signed forwarding). */
 public final class JustLoginVelocity {
 
     private static final String REPO = "https://github.com/filasik/justLogin";
@@ -269,7 +269,7 @@ public final class JustLoginVelocity {
             }
             MojangSkinClient skins = this.skinClient;
             if (!res.onlineAuthenticated()
-                    && cfg.core().skinsRestoreCrackedByName()
+                    && cfg.core().skinsRestoreByName()
                     && !hasTextures(profile)
                     && !(cfg.floodgateFallback() && isFloodgate(originalUuid))
                     && skins != null) {

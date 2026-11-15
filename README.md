@@ -4,8 +4,8 @@
 
 # JustLogin
 
-**Modern cracked + premium authentication for Paper `1.21.7–26.x`, Folia, Velocity, and BungeeCord.**  
-Native **Configuration-phase Paper Dialogs**, **Argon2id** hashing, **standalone & proxy `/premium` auto-login**, **built-in cracked & custom skin management (`/skin`)**, **immutable server UUIDs**, **RFC 6238 2FA**, **SMTP email recovery**, and an **AES-256-GCM encrypted Web Editor**.
+**Modern account authentication for Paper `1.21.7–26.x`, Folia, Velocity, and BungeeCord.**  
+Native **Configuration-phase Paper Dialogs**, **Argon2id** hashing, **standalone & proxy `/premium` Mojang auto-login**, **custom skin management (`/skin`)**, **immutable server UUIDs**, **RFC 6238 2FA**, **SMTP email recovery**, and an **AES-256-GCM encrypted Web Editor**.
 
 [![Paper](https://img.shields.io/badge/Paper-1.21.7–26.3-1f6feb?style=flat-square)](https://papermc.io)
 [![Platforms](https://img.shields.io/badge/Proxy-Velocity%20%7C%20BungeeCord-0ea5e9?style=flat-square)](https://papermc.io/software/velocity)
@@ -25,7 +25,7 @@ Traditional authentication plugins drop unauthenticated players into a live worl
 
 - **Authenticate Before World Spawn (`1.21.7+`)** — Uses Minecraft's native **Configuration-phase Dialog UI** (`AsyncPlayerConnectionConfigureEvent`) so players register, log in, or enter their 2FA code in a clean modal dialog *before chunks, inventories, or coordinates are ever sent*.
 - **Standalone & Proxy `/premium` Auto-Login** — Paid Mojang players can enable `/premium` with **zero external dependencies** (works directly on standalone Paper via Netty encryption handshakes + Mojang `hasJoined`, as well as on Velocity and BungeeCord) while **keeping their original server `game_uuid`**.
-- **Built-In Mojang & Cracked Skin Management (`/skin`)** — Automatically restores matching Mojang skins by username for offline/cracked players (configurable, strictly cosmetic — never bypasses auth or grants `/premium`) and provides `/skin <player|reset>` + `/jl skin <player> <target|reset>` with instant live updates, database persistence, and cooldown protection. No external skin plugin required.
+- **Built-In Skin Management (`/skin`)** — Applies matching Mojang skins by username for players who log in with a password (configurable, strictly cosmetic — never bypasses authentication or grants `/premium`) and provides `/skin <player|reset>` + `/jl skin <player> <target|reset>` with instant live updates, database persistence, and cooldown protection. No external skin plugin required.
 - **Argon2id + Zero Main-Thread I/O** — Memory-hard Argon2id hashing (`19 MiB` default) inside a bounded worker pool prevents hash-flood DoS attacks and transparently upgrades legacy AuthMe (`SHA-256`, `SHA-512`), `BCrypt`, and `PBKDF2` hashes on login.
 - **Complete Account Security** — RFC 6238 TOTP 2FA with 8 single-use backup codes, anti-bot `/captcha`, optional zero-dependency `STARTTLS`/`SSL` SMTP `/email` password recovery, Log4j2 password redaction, and an encrypted Web Editor (`https://justlogin.net`).
 
@@ -57,9 +57,9 @@ When a `1.21.7+` Java client connects, JustLogin pauses the connection inside th
 
 ## 2. Standalone & Proxy `/premium` Auto-Login (Immutable `game_uuid`)
 
-On offline-mode ("cracked") servers, switching a player between cracked and Mojang online mode normally changes their UUID from ` OfflinePlayer:<name>` to their Mojang UUID — wiping inventories, ender chests, economy balances, LuckPerms data, and land claims.
+When an account moves between password login and Mojang-verified login, the player's UUID would normally change — wiping inventories, ender chests, economy balances, LuckPerms data, and land claims.
 
-**JustLogin solves this permanently:** every account receives an immutable **`game_uuid`** on first join that never changes, even when toggling `/premium`, `/cracked`, or renaming a Mojang account.
+**JustLogin solves this permanently:** every account receives an immutable **`game_uuid`** on first join that never changes, even when toggling `/premium` / `/unpremium` or renaming a Mojang account.
 
 ### How `/premium` works in-game
 
@@ -69,7 +69,7 @@ On offline-mode ("cracked") servers, switching a player between cracked and Moja
   <img src="docs/gallery/ingame-premium-armed.png" alt="In-game screenshot of /premium arming Mojang verification" width="720">
 </div>
 
-2. **Reconnect & auto-login**: On their next join, JustLogin performs a full RSA + AES-CFB8 encryption handshake and verifies the session against Mojang's `sessionserver` (`hasJoined`). If the player connects with a cracked client instead, JustLogin safely rolls back the pending request so the player is never locked out of their account.
+2. **Reconnect & auto-login**: On their next join, JustLogin performs a full RSA + AES-CFB8 encryption handshake and verifies the session against Mojang's `sessionserver` (`hasJoined`). If the connecting client cannot present a verified Mojang session, JustLogin safely rolls back the pending request so the player is never locked out of their account.
 
 <div align="center">
   <img src="docs/gallery/ingame-premium-verified.png" alt="In-game screenshot of verified Mojang online session keeping server UUID" width="720">
@@ -78,7 +78,7 @@ On offline-mode ("cracked") servers, switching a player between cracked and Moja
 ### Works on Standalone Paper AND Velocity / BungeeCord
 
 - **Standalone Paper (`premium.standalone-enabled: true`)** — Works out of the box on a single Paper server with **no proxy, no ProtocolLib, and no PacketEvents**. JustLogin intercepts the login handshake directly on Paper's Netty pipeline, verifies Mojang encryption, applies the player's Mojang skin textures, and keeps their permanent `game_uuid` via `AsyncPlayerPreLoginEvent`.
-- **Velocity & BungeeCord Networks (`proxy.enabled: true`)** — `JustLogin-Velocity` / `JustLogin-Bungee` handles Mojang online-mode negotiation and UUID rewriting at the proxy edge, then forwards an **HMAC-SHA256 signed token** (`justlogin:auth`) with timestamp + single-use nonce to your Paper backends. Optional `proxy.auth-servers` locks unauthenticated cracked players to designated auth/lobby servers until `BACKEND_AUTH_OK` is received.
+- **Velocity & BungeeCord Networks (`proxy.enabled: true`)** — `JustLogin-Velocity` / `JustLogin-Bungee` handles Mojang online-mode negotiation and UUID rewriting at the proxy edge, then forwards an **HMAC-SHA256 signed token** (`justlogin:auth`) with timestamp + single-use nonce to your Paper backends. Optional `proxy.auth-servers` keeps unauthenticated players on designated auth/lobby servers until `BACKEND_AUTH_OK` is received.
 
 <div align="center">
   <img src="docs/gallery/proxy-architecture.png" alt="JustLogin Network Immutable UUIDs & Signed Forwarding Architecture" width="880">
@@ -105,7 +105,7 @@ On offline-mode ("cracked") servers, switching a player between cracked and Moja
 
 - **Anti-Bot `/captcha` & Isolated Rate-Limiting** — Configurable alphanumeric Captcha challenges trigger after `captcha.trigger-after-failures: 3` failed login attempts (or on registration when `captcha.require-on-register: true`). Per-account and per-IP rate limits are isolated so a shared NAT/school IP never locks out innocent players prematurely.
 - **Zero-Dependency SMTP Email Recovery** — Players can link and verify an email with `/email set <address> <password>` + `/email confirm <code>` and recover forgotten passwords via `/email recover <username> [code] [newPassword]` over `STARTTLS` or `SSL/TLS` without bundling heavy Jakarta Mail dependencies.
-- **Log4j2 Password Redaction (`LogPasswordFilter`)** — Automatically strips `/login`, `/register`, `/changepassword`, `/unregister`, `/cracked`, `/2fa`, `/email set`, `/email confirm`, `/email recover`, and `/jl changepassword` arguments before they ever reach the console or `logs/latest.log`.
+- **Log4j2 Password Redaction (`LogPasswordFilter`)** — Automatically strips `/login`, `/register`, `/changepassword`, `/unregister`, `/unpremium`, `/2fa`, `/email set`, `/email confirm`, `/email recover`, and `/jl changepassword` arguments before they ever reach the console or `logs/latest.log`.
 - **Safe-by-Default Configuration** —
   - IP-bound HMAC auto-relogin sessions are **off by default** (`sessions.enabled: false`)
   - Unsolicited Mojang username auto-detection is **off by default** (`premium.auto-detect-mojang: false`)
@@ -133,6 +133,20 @@ On offline-mode ("cracked") servers, switching a player between cracked and Moja
 
 ---
 
+## External connections & privacy
+
+JustLogin only talks to the following services. Nothing else is contacted, and no player passwords ever leave your server.
+
+| Service | Purpose | Can be disabled |
+| :--- | :--- | :--- |
+| Mojang `sessionserver.mojang.com` | Verifies `/premium` sessions (`hasJoined`) and fetches signed skin textures for `/skin` | `premium.standalone-enabled: false`, `skins.enabled: false` |
+| GitHub Releases API | Update check (initial + every 12 h) | `update-check: false` |
+| [bStats](https://bstats.org) | Anonymous usage statistics (plugin ID 35316) | `metrics: false` (or the global bStats opt-out) |
+| Web Editor relay (`justlogin.net` / Bytebin) | Receives only an **AES-256-GCM encrypted** snapshot; the decryption key stays in the URL fragment | Don't use `/jl editor`, or set `editor.local-http.enabled: true` for a loopback-only editor |
+| Your SMTP server | Sends account recovery emails | Leave SMTP unconfigured |
+
+---
+
 ## Quick Start
 
 ### Standalone Paper Server
@@ -154,7 +168,7 @@ On offline-mode ("cracked") servers, switching a player between cracked and Moja
 
 | Command | Aliases | Permission | Description |
 | :--- | :--- | :--- | :--- |
-| `/register <pw> <pw>` | `/reg` | `justlogin.use` | Register a new cracked account |
+| `/register <pw> <pw>` | `/reg` | `justlogin.use` | Register a new account |
 | `/login <pw>` | `/l` | `justlogin.use` | Authenticate an existing account |
 | `/logout` | — | `justlogin.use` | End active authenticated session |
 | `/changepassword <old> <new>` | `/changepass`, `/cp` | `justlogin.use` | Change your account password |
@@ -163,7 +177,7 @@ On offline-mode ("cracked") servers, switching a player between cracked and Moja
 | `/email <set\|confirm\|clear\|recover>` | — | `justlogin.email` | Verify/clear recovery email or recover password via SMTP |
 | `/2fa <setup\|confirm\|disable\|verify>` | — | `justlogin.2fa` | Set up, disable, or verify RFC 6238 TOTP 2FA |
 | `/premium` | — | `justlogin.premium` | Arm Mojang online auto-login (standalone Paper & proxy) |
-| `/cracked [password]` | — | `justlogin.premium` | Switch back to offline password authentication |
+| `/unpremium [password]` | — | `justlogin.premium` | Switch back to password authentication (the `[password]` is only needed if your account has none yet) |
 | `/skin <player\|reset>` | `/skins` | `justlogin.skin` | Change or reset your player skin with persistent storage |
 | `/jl help [page\|topic\|cmd]` | `/justlogin help`, `/jl ?` | `justlogin.use` | Interactive paginated help and command detail cards |
 | `/justlogin reload` | `/jl`, `/auth` | `justlogin.admin.reload` | Reload `config.yml` and locale messages |
@@ -217,7 +231,7 @@ premium:
 
 skins:
   enabled: true                   # built-in skin restoration & /skin command
-  restore-cracked-by-name: true   # auto-apply matching Mojang skin for cracked logins (cosmetic only)
+  restore-by-name: true           # auto-apply the matching Mojang skin for password logins (cosmetic only)
   command-enabled: true           # allow authenticated players to run /skin <player|reset>
   cooldown-seconds: 60
   cache-seconds: 600

@@ -230,7 +230,8 @@ public record Settings(
                 ? cfg.getLong("premium.mojang-cache-seconds", 300L)
                 : cfg.getLong("proxy.mojang-cache-seconds", 300L));
         boolean skinsEnabled = cfg.getBoolean("skins.enabled", true);
-        boolean skinsRestoreCracked = cfg.getBoolean("skins.restore-cracked-by-name", true);
+        boolean skinsRestoreByName = cfg.getBoolean("skins.restore-by-name",
+                cfg.getBoolean("skins.restore-cracked-by-name", true));
         boolean skinsCommandEnabled = cfg.getBoolean("skins.command-enabled", true);
         long skinCooldownSeconds = Math.max(0L, cfg.getLong("skins.cooldown-seconds", 60L));
         long skinsCacheSeconds = Math.max(10L, cfg.getLong("skins.cache-seconds", 600L));
@@ -318,7 +319,7 @@ public record Settings(
                 maxAccountsPerIp,
                 auditRetentionDays,
                 skinsEnabled,
-                skinsRestoreCracked,
+                skinsRestoreByName,
                 skinsCacheSeconds
         );
 
@@ -339,8 +340,8 @@ public record Settings(
         return core.skinsEnabled();
     }
 
-    public boolean skinsRestoreCrackedByName() {
-        return core.skinsRestoreCrackedByName();
+    public boolean skinsRestoreByName() {
+        return core.skinsRestoreByName();
     }
 
     public long skinsCacheSeconds() {

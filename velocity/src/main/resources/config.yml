@@ -28,8 +28,8 @@ proxy:
 skins:
   # Apply saved /skin textures and optional Mojang skins on Velocity proxy
   enabled: true
-  # Automatically restore matching Mojang skin by username for cracked/offline players (strictly cosmetic)
-  restore-cracked-by-name: true
+  # Automatically restore matching Mojang skin by username for password-authenticated players (strictly cosmetic)
+  restore-by-name: true
   cache-seconds: 600
 
 storage:

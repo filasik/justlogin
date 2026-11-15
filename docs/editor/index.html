@@ -139,7 +139,7 @@
     .seg button { height: 26px; padding: 0 12px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); font-size: 13px; font-weight: 500; }
     .seg button:hover { color: var(--ink); }
     .seg button[aria-checked="true"] { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
-    .seg button.cracked[aria-checked="true"] { background: var(--line); color: var(--ink); }
+    .seg button.pwlogin[aria-checked="true"] { background: var(--line); color: var(--ink); }
 
     .state { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); }
     .state.on { color: var(--ink); }
@@ -482,7 +482,7 @@
       const seg = el('div', 'seg');
       seg.setAttribute('role', 'radiogroup');
       seg.setAttribute('aria-label', `Login mode for ${acc.name}`);
-      const options = [['null', 'Unset', ''], ['true', 'Premium', 'premium'], ['false', 'Cracked', 'cracked']];
+      const options = [['null', 'Unset', ''], ['true', 'Premium', 'premium'], ['false', 'Password', 'pwlogin']];
       const buttons = options.map(([v, label, cls]) => {
         const b = el('button', cls, label);
         b.type = 'button';

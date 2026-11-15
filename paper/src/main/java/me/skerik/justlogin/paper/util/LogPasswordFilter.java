@@ -18,7 +18,7 @@ public final class LogPasswordFilter extends AbstractFilter {
 
     private static final Pattern SENSITIVE_COMMAND_LOG = Pattern.compile(
             "(?i).*issued server command:\\s*/(?:[a-z0-9_-]+:)?("
-                    + "login|l|register|reg|changepassword|changepass|cp|unregister|cracked|2fa|email\\s+(?:recover|set|confirm)"
+                    + "login|l|register|reg|changepassword|changepass|cp|unregister|unpremium|cracked|2fa|email\\s+(?:recover|set|confirm)"
                     + "|(?:justlogin|jl|auth)\\s+(?:changepassword|changepass|import\\s+\\S+\\s+mysql|applyedits)"
                     + ")\\b.*"
     );

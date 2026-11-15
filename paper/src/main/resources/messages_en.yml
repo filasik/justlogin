@@ -70,8 +70,8 @@ totp:
   disabled: "<yellow>Two-factor authentication has been disabled.</yellow>"
 
 premium:
-  requires-proxy: "<red>/premium and /cracked require a trusted Velocity or BungeeCord proxy running JustLogin.</red>"
-  not-enabled: "<red>/premium and /cracked are disabled on this server (enable <white>premium.standalone-enabled</white> or a proxy).</red>"
+  requires-proxy: "<red>/premium and /unpremium require a trusted Velocity or BungeeCord proxy running JustLogin.</red>"
+  not-enabled: "<red>/premium and /unpremium are disabled on this server (enable <white>premium.standalone-enabled</white> or a proxy).</red>"
   already-online-mode: "<yellow>This server already runs in full Mojang online-mode for every player.</yellow>"
   pending-created: "<green>Premium verification armed for your next connection.</green> <gray>Reconnect with an official Mojang client to verify your account while keeping your exact server UUID.</gray>"
   confirmed: "<green>Mojang account verified! Automatic premium login is now active while keeping your server UUID.</green>"
@@ -79,9 +79,9 @@ premium:
   verification-failed: "<red>Mojang online authentication failed. Reconnect with a legitimate Minecraft account.</red>"
   auth-servers-unavailable: "<red>Mojang authentication servers are currently unavailable. Please try again shortly.</red>"
   online-mode-required: "<red>This account requires Mojang online authentication.</red>"
-  switched-cracked: "<yellow>Your account is now set to cracked (password login required on next join).</yellow>"
-  password-required-for-cracked: "<red>Set a password with <white>/changepassword</white> or <white>/cracked <password></white> before switching to cracked mode.</red>"
-  password-already-set: "<red>Your account already has a password. Use <white>/cracked</white> without arguments or <white>/changepassword <old> <new></white>.</red>"
+  switched-cracked: "<yellow>Your account is now set to password login (a password is required on next join).</yellow>"
+  password-required-for-cracked: "<red>Set a password with <white>/changepassword</white> or <white>/unpremium <password></white> before switching to password login.</red>"
+  password-already-set: "<red>Your account already has a password. Use <white>/unpremium</white> without arguments or <white>/changepassword <old> <new></white>.</red>"
   fallback-disabled: "<red>Premium online verification is required for this account and password fallback is disabled.</red>"
 
 dialog:
@@ -160,7 +160,7 @@ proxy:
   deny-premium-required: "<red>This account requires Mojang online authentication.</red>"
   deny-missing-uuid: "<red>Missing Mojang profile UUID.</red>"
   deny-mojang-already-linked: "<red>That Mojang account is already linked to another player.</red>"
-  deny-registered-offline: "<red>This username is registered in offline mode. Log in with your password and use <white>/premium</white>.</red>"
+  deny-registered-offline: "<red>This username is registered with password login. Log in with your password and use <white>/premium</white>.</red>"
   deny-uuid-mismatch: "<red>This username is bound to a previously registered Mojang account that changed its name. Contact an administrator (<white>/jl rename</white>).</red>"
   deny-mojang-unavailable: "<red>Mojang authentication servers are temporarily unavailable. Please try again in a moment.</red>"
 
@@ -193,7 +193,7 @@ gui:
   page-info: "<white>Page {page}/{pages} <gray>({total} accounts)</gray></white>"
   filter-all: "<aqua>Filter: All Accounts</aqua>"
   filter-premium: "<green>Filter: Premium Only</green>"
-  filter-cracked: "<yellow>Filter: Cracked Only</yellow>"
+  filter-cracked: "<yellow>Filter: Password Login Only</yellow>"
   filter-2fa: "<gold>Filter: 2FA Enabled</gold>"
 
 editor:
@@ -309,11 +309,11 @@ help:
       syntax: "/premium"
       desc: "Enable automatic Mojang online-mode login on your next join."
       example: "/premium"
-      note: "Preserves your existing server game_uuid and inventory; rolls back safely if offline."
-    cracked:
-      syntax: "/cracked [password]"
-      desc: "Switch back to offline password login while keeping your UUID."
-      example: "/cracked"
+      note: "Preserves your existing server game_uuid and inventory; rolls back safely if verification fails."
+    unpremium:
+      syntax: "/unpremium [password]"
+      desc: "Switch back to password login while keeping your UUID."
+      example: "/unpremium"
       note: "Only supply [password] if your auto-registered premium account has no password yet."
     email_set:
       syntax: "/email set <address> <password>"

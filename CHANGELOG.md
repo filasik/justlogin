@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Built-in Skin Management & Schema v3 (`Migrations` v3, Config v5)**:
   - `MojangSkinClient` fetches signed Mojang skin textures (`value` + `signature` via `sessionserver.mojang.com/...?unsigned=false`) with bounded TTL caching and fail-open timeouts so Mojang outages never block logins.
   - Persistent custom skin columns on `justlogin_accounts` (`skin_owner`, `skin_value`, `skin_signature`, `skin_updated_at`) preserved across `/jl merge` and `/jl rename`.
-  - Configurable `skins:` section (`enabled`, `restore-cracked-by-name`, `command-enabled`, `cooldown-seconds`, `cache-seconds`) automatically restores matching Mojang skins by username for offline/cracked joins (strictly cosmetic; never grants `/premium`) across standalone Paper, Velocity (`GameProfileRequestEvent`), and Paper backends.
+  - Configurable `skins:` section (`enabled`, `command-enabled`, `cooldown-seconds`, `cache-seconds`, plus a restore-by-username toggle) automatically restores matching Mojang skins by username for password-authenticated joins (strictly cosmetic; never grants `/premium`) across standalone Paper, Velocity (`GameProfileRequestEvent`), and Paper backends.
   - In-game `/skin <player|reset>` (alias `/skins`, `justlogin.skin`, cooldown bypass `justlogin.skin.bypasscooldown`) and admin `/jl skin <player> <target|reset>` (`justlogin.admin.skin`) updating live `PlayerProfile` on Paper/Folia entity threads with DB persistence and `CommandDoc`/`HelpRenderer` documentation in `en`, `cs`, and `sk`.
 - **1-Click Legacy Auto-Migration Hardening**: expanded `MigrationScanner` + importers for AuthMe, FastLogin, LibreLogin (`librepremium_data`, split `BCrypt-2A`/`Argon-2ID`), LoginSecurity (`ls_players`), nLogin (`$SHA512$` reversed format + `mojang_id`), OpeNLogin (`openlogin`), LimboAuth (`AUTH`), and Authy (`players`), with `--dry-run` preview and audit reports.
 - **Interactive `/jl help`**: paginated help and detailed command cards (`CommandDoc`, `HelpRenderer`, `HelpCommandCompletenessTest`) filtering by permission and active server features across `en`/`cs`/`sk`.
@@ -19,6 +19,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Web Editor redesign** (`docs/editor/index.html`, mirrored in `editor/src/main/resources/web-editor/`): calmer light/dark theme, segmented login-mode control, switches, summary figures, pending-changes bar with Discard, copyable apply command, collapsible relay setting and responsive layout. Same encryption flow and strict CSP; adds a `?demo` preview with made-up data.
+
+## [1.0.1] - 2026-11-15
+
+### Changed
+- Polished wording of in-game messages, help pages and documentation across `en`, `cs` and `sk`.
+- Minor Web Editor label tweaks.
+- Config: one `skins:` option was renamed; existing configs are migrated automatically (`config-version: 6`).
+- Internal cleanups and small stability improvements.
 
 ## [1.0.0] - 2026-11-13
 
@@ -48,7 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - bStats support (`metrics: true` toggle + `SimplePie` charts across Paper, Velocity, and BungeeCord).
   - Full `docs/assets/`, `docs/gallery/`, `.github/` workflows, and Modrinth/Spigot store copy.
 - **Authentication & UI**:
-  - Standalone Paper Mojang premium auto-login (`/premium` and `/cracked` directly on `online-mode=false` Paper servers without BungeeCord, Velocity, ProtocolLib, or PacketEvents) via Paper `ChannelInitializeListenerHolder` + RSA/AES challenge + Mojang `hasJoined` verification + signed `textures` skin restoration.
+  - Standalone Paper Mojang premium auto-login (`/premium` and its counterpart directly on standalone Paper servers without BungeeCord, Velocity, ProtocolLib, or PacketEvents) via Paper `ChannelInitializeListenerHolder` + RSA/AES challenge + Mojang `hasJoined` verification + signed `textures` skin restoration.
   - Native Paper 1.21.7+ Configuration-phase `Dialog` authentication (`AsyncPlayerConnectionConfigureEvent`) with `command` UI fallback for Bedrock (Floodgate) and `< 1.21.7` clients.
   - Argon2id password hashing (`password4j` 1.8.4) on bounded hashing workers, plus automatic transparent rehash for AuthMe SHA-256 / SHA-512, BCrypt, and PBKDF2 hashes.
   - RFC 6238 TOTP 2FA (`/2fa setup`, `/2fa confirm`, `/2fa disable`, `/2fa verify`) and 8 single-use hashed backup codes.
@@ -61,5 +69,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fail-closed `ProxyStartupCheck` verifying Paper forwarding configuration (`velocity` / `bungee`) and non-placeholder `shared-secret` on startup.
 - Log4j2 root filter redacting plaintext passwords from player auth commands across console and logs.
 - HMAC-SHA256 + timestamp + replay-nonce verification on `justlogin:auth` plugin messaging channel.
-- Immutable `game_uuid` assigned once on account creation and preserved on standalone Paper, Velocity, and BungeeCord across `/premium`, `/cracked`, and Mojang renames.
+- Immutable `game_uuid` assigned once on account creation and preserved on standalone Paper, Velocity, and BungeeCord across `/premium` toggles and Mojang renames.
 - Per-(account, IP) and per-IP rate limiting + exponential backoff, duplicate-login pre-auth protection, and fail-closed pre-auth lockdown.

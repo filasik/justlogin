@@ -70,8 +70,8 @@ totp:
   disabled: "<yellow>Dvoufaktorové ověření bylo vypnuto.</yellow>"
 
 premium:
-  requires-proxy: "<red>/premium a /cracked vyžadují důvěryhodnou proxy Velocity nebo BungeeCord s JustLogin.</red>"
-  not-enabled: "<red>Příkazy /premium a /cracked jsou na tomto serveru vypnuté (povol <white>premium.standalone-enabled</white> nebo proxy).</red>"
+  requires-proxy: "<red>/premium a /unpremium vyžadují důvěryhodnou proxy Velocity nebo BungeeCord s JustLogin.</red>"
+  not-enabled: "<red>Příkazy /premium a /unpremium jsou na tomto serveru vypnuté (povol <white>premium.standalone-enabled</white> nebo proxy).</red>"
   already-online-mode: "<yellow>Tento server již běží v plném originálním online-mode režimu pro všechny hráče.</yellow>"
   pending-created: "<green>Ověření originálního účtu je připraveno pro příští připojení.</green> <gray>Odpoj se a připoj znovu s originálním Mojang klientem při zachování tvého serverového UUID.</gray>"
   confirmed: "<green>Originální účet Mojang ověřen! Automatické přihlášení je nyní aktivní při zachování tvého serverového UUID.</green>"
@@ -79,9 +79,9 @@ premium:
   verification-failed: "<red>Ověření přes Mojang účet selhalo. Připoj se s platným originálním účtem Minecraft.</red>"
   auth-servers-unavailable: "<red>Ověřovací servery Mojangu jsou momentálně nedostupné. Zkus to prosím za chvíli.</red>"
   online-mode-required: "<red>Tento účet vyžaduje přihlášení přes originální účet Mojang.</red>"
-  switched-cracked: "<yellow>Tvůj účet byl přepnut na neoriginální režim (příště bude vyžadováno heslo).</yellow>"
-  password-required-for-cracked: "<red>Nejprve si nastav heslo pomocí <white>/changepassword</white> nebo <white>/cracked <heslo></white>.</red>"
-  password-already-set: "<red>Tvůj účet již má nastavené heslo. Použij <white>/cracked</white> bez argumentu nebo <white>/changepassword <staré> <nové></white>.</red>"
+  switched-cracked: "<yellow>Tvůj účet byl přepnut na přihlašování heslem (příště bude vyžadováno heslo).</yellow>"
+  password-required-for-cracked: "<red>Nejprve si nastav heslo pomocí <white>/changepassword</white> nebo <white>/unpremium <heslo></white>.</red>"
+  password-already-set: "<red>Tvůj účet již má nastavené heslo. Použij <white>/unpremium</white> bez argumentu nebo <white>/changepassword <staré> <nové></white>.</red>"
   fallback-disabled: "<red>Tento účet vyžaduje ověření přes Mojang a nouzové přihlášení heslem je vypnuté.</red>"
 
 dialog:
@@ -160,7 +160,7 @@ proxy:
   deny-premium-required: "<red>Tento účet vyžaduje přihlášení přes originální účet Mojang.</red>"
   deny-missing-uuid: "<red>Chybí UUID profilu Mojang.</red>"
   deny-mojang-already-linked: "<red>Tento účet Mojang je již propojen s jiným hráčem.</red>"
-  deny-registered-offline: "<red>Toto jméno je zaregistrováno v offline režimu. Přihlas se heslem a použij <white>/premium</white>.</red>"
+  deny-registered-offline: "<red>Toto jméno je zaregistrováno s přihlašováním heslem. Přihlas se heslem a použij <white>/premium</white>.</red>"
   deny-uuid-mismatch: "<red>Toto jméno je vázáno na dříve zaregistrovaný účet Mojang, který si změnil jméno. Kontaktuj administrátora (<white>/jl rename</white>).</red>"
   deny-mojang-unavailable: "<red>Ověřovací servery Mojangu jsou dočasně nedostupné. Zkus to prosím za okamžik.</red>"
 
@@ -193,7 +193,7 @@ gui:
   page-info: "<white>Strana {page}/{pages} <gray>({total} účtů)</gray></white>"
   filter-all: "<aqua>Filtr: Všechny účty</aqua>"
   filter-premium: "<green>Filtr: Pouze Premium</green>"
-  filter-cracked: "<yellow>Filtr: Pouze Cracked</yellow>"
+  filter-cracked: "<yellow>Filtr: Pouze přihlášení heslem</yellow>"
   filter-2fa: "<gold>Filtr: Zapnuté 2FA</gold>"
 
 editor:
@@ -310,10 +310,10 @@ help:
       desc: "Zapne automatické Mojang online-mode přihlášení při příštím vstupu."
       example: "/premium"
       note: "Zachová tvoje stávající serverové game_uuid i inventář; při selhání se bezpečně vrátí zpět."
-    cracked:
-      syntax: "/cracked [password]"
+    unpremium:
+      syntax: "/unpremium [password]"
       desc: "Přepne účet zpět na přihlašování heslem při zachování UUID."
-      example: "/cracked"
+      example: "/unpremium"
       note: "Parametr [password] zadej jen tehdy, pokud tvůj automaticky založený premium účet ještě nemá heslo."
     email_set:
       syntax: "/email set <address> <password>"

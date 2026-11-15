@@ -27,7 +27,7 @@ public record CoreSettings(
         int maxAccountsPerIp,
         int auditRetentionDays,
         boolean skinsEnabled,
-        boolean skinsRestoreCrackedByName,
+        boolean skinsRestoreByName,
         long skinsCacheSeconds
 ) {
 

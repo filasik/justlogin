@@ -23,7 +23,7 @@ cp "$JAR" "$WORK_DIR/plugins/JustLogin.jar"
 rm -rf paper/run/plugins/JustLogin* paper/run/logs/latest.log 2>/dev/null || true
 mkdir -p paper/run/plugins
 
-# Standalone /premium hook only activates on offline-mode servers (online-mode=false), which is what
+# Standalone /premium hook only activates on servers without Mojang authentication (online-mode=false), which is what
 # the banner check below expects. A fresh CI server defaults to online-mode=true, so force it here.
 PROPS="paper/run/server.properties"
 if [[ -f "$PROPS" ]] && grep -q '^online-mode=' "$PROPS"; then

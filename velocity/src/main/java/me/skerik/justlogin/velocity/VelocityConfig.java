@@ -130,7 +130,8 @@ public record VelocityConfig(
         }
 
         boolean skinsEnabled = root.node("skins", "enabled").getBoolean(true);
-        boolean skinsRestoreCracked = root.node("skins", "restore-cracked-by-name").getBoolean(true);
+        boolean skinsRestoreByName = root.node("skins", "restore-by-name")
+                .getBoolean(root.node("skins", "restore-cracked-by-name").getBoolean(true));
         long skinsCacheSec = Math.max(10L, root.node("skins", "cache-seconds").getLong(600L));
 
         CoreSettings core = new CoreSettings(
@@ -144,7 +145,7 @@ public record VelocityConfig(
                 d.totpIssuer(), d.totpWindowSteps(),
                 autoDetect, cacheSec,
                 d.maxAccountsPerIp(), d.auditRetentionDays(),
-                skinsEnabled, skinsRestoreCracked, skinsCacheSec
+                skinsEnabled, skinsRestoreByName, skinsCacheSec
         );
 
         String invalidMsg = resolveMessage(

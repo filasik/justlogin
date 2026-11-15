@@ -224,7 +224,7 @@ class AuthServiceAndImporterTest {
             // Repeat /premium on already-confirmed account returns ALREADY_PREMIUM
             assertEquals(AuthService.Status.ALREADY_PREMIUM, auth.requestPremium("PremPlayer", "PremPlayer").join().status());
 
-            // Switching back to /cracked disables premium & preserves original gameUuid
+            // Switching back to /unpremium disables premium & preserves original gameUuid
             assertEquals(AuthService.Status.SUCCESS, auth.setCracked("PremPlayer", "PremPlayer").join().status());
             Account crackedAgain = accounts.findByNameLower("premplayer").join().orElseThrow();
             assertFalse(crackedAgain.isPremiumConfirmed());

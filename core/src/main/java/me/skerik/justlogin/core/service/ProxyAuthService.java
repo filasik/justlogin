@@ -190,7 +190,7 @@ public final class ProxyAuthService {
                 }
                 if (acc.premiumPending()) {
                     long now = clock.getAsLong();
-                    // Single-shot consume + automatic rollback in DB BEFORE encryption challenge so failed/cracked joins never soft-lock
+                    // Single-shot consume + automatic rollback in DB BEFORE encryption challenge so failed joins never soft-lock
                     return accounts.setPremiumPending(acc.id(), false, now).thenApply(v -> {
                         armedPendingByName.put(nameLower, new ArmedPending(acc, now + 30_000L));
                         return new PreLoginDecision(PreLoginAction.FORCE_ONLINE, acc);
@@ -253,7 +253,7 @@ public final class ProxyAuthService {
                 if (acc.isPremiumConfirmed()) {
                     return JoinResolution.deny(DenyReason.PREMIUM_REQUIRED);
                 }
-                // Preserve immutable game_uuid across /premium -> /cracked switches
+                // Preserve immutable game_uuid across /premium -> /unpremium switches
                 return JoinResolution.offline(acc.gameUuid(), acc.id()).withCustomSkin(acc);
             });
         }
