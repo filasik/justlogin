@@ -3,14 +3,164 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none';">
-  <title>JustLogin · Authentication for Minecraft servers</title>
-  <meta name="description" content="Open-source authentication for Paper, Folia, Velocity and BungeeCord. Argon2id, 2FA, immutable UUIDs and an end-to-end encrypted web editor.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; script-src 'unsafe-inline' https://scope.skerik.me; connect-src https://scope.skerik.me; manifest-src 'self'; base-uri 'none'; form-action 'none';">
+  <title>JustLogin – Minecraft Authentication Plugin for Paper, Folia, Velocity &amp; BungeeCord</title>
+  <meta name="description" content="Free open-source Minecraft login plugin: register and log in before the world loads, Argon2id hashing, 2FA, Mojang /premium auto-login with permanent UUIDs. Paper, Folia, Velocity, BungeeCord.">
+  <meta name="keywords" content="Minecraft authentication plugin, Minecraft login plugin, Paper login plugin, Folia, Velocity, BungeeCord, AuthMe alternative, 2FA, Argon2id, Mojang auto-login, Minecraft server security">
+  <meta name="author" content="Filip Skerik">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <link rel="canonical" href="https://justlogin.net/">
+  <meta name="theme-color" content="#f3f5fa" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0e1220" media="(prefers-color-scheme: dark)">
+
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="JustLogin">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:url" content="https://justlogin.net/">
+  <meta property="og:title" content="JustLogin – Authentication for Minecraft servers">
+  <meta property="og:description" content="Players register and log in before they spawn. Argon2id, 2FA, Mojang auto-login with permanent UUIDs, encrypted web editor. Free and open source (MIT).">
+  <meta property="og:image" content="https://justlogin.net/assets/og-image.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="JustLogin – authentication for Minecraft servers on Paper, Folia, Velocity and BungeeCord">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="JustLogin – Authentication for Minecraft servers">
+  <meta name="twitter:description" content="Native login dialogs before the world loads, Argon2id, 2FA and permanent UUIDs. Free and open source.">
+  <meta name="twitter:image" content="https://justlogin.net/assets/og-image.png">
+  <meta name="twitter:image:alt" content="JustLogin – authentication for Minecraft servers">
+
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://justlogin.net/#website",
+      "url": "https://justlogin.net/",
+      "name": "JustLogin",
+      "description": "Open-source authentication plugin for Minecraft servers.",
+      "inLanguage": "en",
+      "publisher": {
+        "@id": "https://justlogin.net/#author"
+      }
+    },
+    {
+      "@type": "Person",
+      "@id": "https://justlogin.net/#author",
+      "name": "Filip Skerik",
+      "url": "https://github.com/filasik",
+      "sameAs": [
+        "https://github.com/filasik"
+      ]
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://justlogin.net/#software",
+      "name": "JustLogin",
+      "alternateName": "JustLogin authentication plugin",
+      "description": "Open-source authentication plugin for Paper, Folia, Velocity and BungeeCord with native login dialogs shown before the world loads, Argon2id password hashing, TOTP two-factor authentication, Mojang auto-login with immutable UUIDs and an end-to-end encrypted web editor.",
+      "applicationCategory": "SecurityApplication",
+      "applicationSubCategory": "Minecraft server plugin",
+      "operatingSystem": "Java 21+; Paper 1.21.7-26.x, Folia, Velocity 3, BungeeCord",
+      "softwareVersion": "1.0.1",
+      "license": "https://github.com/filasik/justLogin/blob/main/LICENSE",
+      "isAccessibleForFree": true,
+      "url": "https://justlogin.net/",
+      "image": "https://justlogin.net/assets/og-image.png",
+      "screenshot": "https://justlogin.net/gallery/ingame-register-dialog.png",
+      "downloadUrl": "https://github.com/filasik/justLogin/releases/latest",
+      "softwareHelp": {
+        "@type": "CreativeWork",
+        "url": "https://github.com/filasik/justLogin/wiki"
+      },
+      "releaseNotes": "https://github.com/filasik/justLogin/blob/main/CHANGELOG.md",
+      "codeRepository": "https://github.com/filasik/justLogin",
+      "author": {
+        "@id": "https://justlogin.net/#author"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+  ]
+}
+  </script>
   <script>
     // Links generated by older plugin versions point at the site root (…/?code=…#key). Forward them to the editor.
     if (/[?&]code=/.test(location.search) && location.hash.length > 1) {
       location.replace('/editor/' + location.search + location.hash);
     }
+  </script>
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Which Minecraft and Java versions does JustLogin support?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Paper 1.21.7 to 26.x and Folia, plus Velocity 3 and BungeeCord / Waterfall on the proxy side. Java 21 or newer is required."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is JustLogin an alternative to AuthMe?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It covers the same job (registration, login, password recovery) with modern foundations: Argon2id hashing, 2FA, native login dialogs before the world loads and permanent UUIDs. A one-command importer migrates accounts from AuthMe, LibreLogin, nLogin, LoginSecurity, LimboAuth, OpeNLogin, Authy and FastLogin; legacy password hashes keep working and are upgraded on the next login."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do players get a login screen before they spawn?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Java 1.21.7+ clients get a native dialog during the configuration phase, so the player never appears in the world until authenticated. Older clients and Bedrock players use a locked-down command flow or Floodgate forms."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does /premium do?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Players who own a Minecraft Java account can enable automatic Mojang-verified login without typing a password. Their server UUID stays the same, so inventories, permissions and claims are kept. It works on a single Paper server without a proxy, and on Velocity and BungeeCord."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does it work on Folia and behind a proxy?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. JustLogin never uses the Bukkit scheduler, so it runs on Folia. On Velocity or BungeeCord networks the proxy module forwards HMAC-SHA256 signed authentication messages to the Paper backends, and everything fails closed if the setup is wrong."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is JustLogin free? What does it send to the internet?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It is free and MIT licensed. It only contacts Mojang (for verification and skins), the GitHub Releases API (update check) and anonymous bStats; all can be switched off in the config. Passwords never leave your server."
+      }
+    }
+  ]
+}
+  </script>
+  <!-- Privacy-friendly analytics by Plausible -->
+  <script async src="https://scope.skerik.me/js/pa-w7TUAtqd-er95R3X7fJD3.js"></script>
+  <script>
+    window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+    plausible.init()
   </script>
   <style>
     :root {
@@ -151,6 +301,15 @@
     .get b svg { width: 16px; height: 16px; color: var(--muted); }
     .get span { display: block; margin-top: 4px; font-size: 14px; color: var(--muted); }
 
+    /* faq */
+    .faq { margin-top: 32px; border-top: 1px solid var(--line); }
+    .faq details { border-bottom: 1px solid var(--line); padding: 4px 0; }
+    .faq summary { cursor: pointer; list-style: none; padding: 14px 28px 14px 0; font-weight: 600; position: relative; }
+    .faq summary::-webkit-details-marker { display: none; }
+    .faq summary::after { content: "+"; position: absolute; right: 4px; top: 12px; font: 400 22px var(--mono); color: var(--accent); }
+    .faq details[open] summary::after { content: "\2212"; }
+    .faq p { margin: 0 0 16px; color: var(--muted); max-width: 70ch; }
+
     /* footer */
     footer { padding: 40px 0 56px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
     .foot { display: flex; flex-wrap: wrap; gap: 24px 48px; justify-content: space-between; }
@@ -201,6 +360,7 @@
       <a href="#editor">Web editor</a>
       <a href="#install">Install</a>
       <a href="https://github.com/filasik/justLogin/wiki">Docs</a>
+      <a href="#faq">FAQ</a>
       <a class="keep" href="https://github.com/filasik/justLogin">GitHub</a>
     </div>
   </div>
@@ -371,6 +531,40 @@
       </div>
     </div>
   </section>
+
+  <section id="faq">
+    <div class="wrap">
+      <div class="label">FAQ</div>
+      <h2>Frequently asked questions</h2>
+      <div class="faq">
+        <details>
+          <summary>Which Minecraft and Java versions does JustLogin support?</summary>
+          <p>Paper 1.21.7 to 26.x and Folia, plus Velocity 3 and BungeeCord / Waterfall on the proxy side. Java 21 or newer is required.</p>
+        </details>
+        <details>
+          <summary>Is JustLogin an alternative to AuthMe?</summary>
+          <p>It covers the same job (registration, login, password recovery) with modern foundations: Argon2id hashing, 2FA, native login dialogs before the world loads and permanent UUIDs. A one-command importer migrates accounts from AuthMe, LibreLogin, nLogin, LoginSecurity, LimboAuth, OpeNLogin, Authy and FastLogin; legacy password hashes keep working and are upgraded on the next login.</p>
+        </details>
+        <details>
+          <summary>Do players get a login screen before they spawn?</summary>
+          <p>Yes. Java 1.21.7+ clients get a native dialog during the configuration phase, so the player never appears in the world until authenticated. Older clients and Bedrock players use a locked-down command flow or Floodgate forms.</p>
+        </details>
+        <details>
+          <summary>What does /premium do?</summary>
+          <p>Players who own a Minecraft Java account can enable automatic Mojang-verified login without typing a password. Their server UUID stays the same, so inventories, permissions and claims are kept. It works on a single Paper server without a proxy, and on Velocity and BungeeCord.</p>
+        </details>
+        <details>
+          <summary>Does it work on Folia and behind a proxy?</summary>
+          <p>Yes. JustLogin never uses the Bukkit scheduler, so it runs on Folia. On Velocity or BungeeCord networks the proxy module forwards HMAC-SHA256 signed authentication messages to the Paper backends, and everything fails closed if the setup is wrong.</p>
+        </details>
+        <details>
+          <summary>Is JustLogin free? What does it send to the internet?</summary>
+          <p>It is free and MIT licensed. It only contacts Mojang (for verification and skins), the GitHub Releases API (update check) and anonymous bStats; all can be switched off in the config. Passwords never leave your server.</p>
+        </details>
+      </div>
+      <p class="sub">More answers, setup guides and the full configuration reference are in the <a href="https://github.com/filasik/justLogin/wiki">documentation</a>.</p>
+    </div>
+  </section>
 </main>
 
 <footer>
@@ -378,6 +572,7 @@
     <div>
       <p><b style="color:var(--ink)">JustLogin</b> is free software released under the MIT license, © Filip Skerik.</p>
       <p>Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft.</p>
+      <p>This site uses <a href="https://plausible.io">Plausible</a> for cookie-free, privacy-friendly visitor statistics.</p>
     </div>
     <div>
       <h4>Project</h4>
