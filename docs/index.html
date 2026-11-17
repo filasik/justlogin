@@ -301,6 +301,17 @@
     .get b svg { width: 16px; height: 16px; color: var(--muted); }
     .get span { display: block; margin-top: 4px; font-size: 14px; color: var(--muted); }
 
+    /* plugin family */
+    .family { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 36px; }
+    .family article { display: flex; flex-direction: column; padding: 24px; border: 1px solid var(--line-strong); border-radius: 12px; background: var(--surface); }
+    .family-head { display: flex; align-items: center; gap: 16px; }
+    .family img { display: block; width: 64px; height: 64px; flex: none; border-radius: 14px; }
+    .family h3 { margin: 0; font-size: 20px; letter-spacing: -0.01em; }
+    .family p { margin: 18px 0 24px; font-size: 15px; color: var(--muted); }
+    .family-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; margin-top: auto; }
+    .family-source { font-size: 14px; color: var(--muted); text-underline-offset: 3px; }
+    .family-source:hover { color: var(--ink); }
+
     /* faq */
     .faq { margin-top: 32px; border-top: 1px solid var(--line); }
     .faq details { border-bottom: 1px solid var(--line); padding: 4px 0; }
@@ -330,7 +341,7 @@
     @media (max-width: 560px) {
       .wrap { padding: 0 16px; }
       .links a:not(.keep) { display: none; }
-      .grid { grid-template-columns: 1fr; }
+      .grid, .family { grid-template-columns: 1fr; }
       .cta .btn { flex: 1 1 100%; justify-content: center; }
     }
   </style>
@@ -361,6 +372,7 @@
       <a href="#install">Install</a>
       <a href="https://github.com/filasik/justLogin/wiki">Docs</a>
       <a href="#faq">FAQ</a>
+      <a class="keep" href="#plugins">Plugins</a>
       <a class="keep" href="https://github.com/filasik/justLogin">GitHub</a>
     </div>
   </div>
@@ -532,6 +544,60 @@
     </div>
   </section>
 
+  <section id="plugins" aria-labelledby="plugins-title">
+    <div class="wrap">
+      <div class="label">Plugin family</div>
+      <h2 id="plugins-title">More plugins for your server.</h2>
+      <p class="sub">JustLogin is part of a family of free, open-source Minecraft plugins by Filip Skerik. Meet the others and download them on GitHub Releases.</p>
+      <div class="family">
+        <article aria-labelledby="ai-friend-title">
+          <div class="family-head">
+            <img src="assets/plugins/ai-friend.svg" width="64" height="64" loading="lazy" alt="">
+            <h3 id="ai-friend-title">AI Friend</h3>
+          </div>
+          <p>An AI chat companion with its own name and personality. Answers players' questions using OpenAI, Claude, a local Ollama model or another compatible provider.</p>
+          <div class="family-actions">
+            <a class="btn small" href="https://github.com/filasik/ai-friend/releases/latest" aria-label="Download AI Friend on GitHub Releases">Download</a>
+            <a class="family-source" href="https://github.com/filasik/ai-friend" aria-label="AI Friend source on GitHub">Source on GitHub</a>
+          </div>
+        </article>
+        <article aria-labelledby="justauction-title">
+          <div class="family-head">
+            <img src="assets/plugins/justauction.svg" width="64" height="64" loading="lazy" alt="">
+            <h3 id="justauction-title">JustAuction</h3>
+          </div>
+          <p>A player auction house with fixed-price listings, timed bidding and a clean inventory menu. Vault economy support and crash recovery keep trades safe.</p>
+          <div class="family-actions">
+            <a class="btn small" href="https://github.com/filasik/justAuction/releases/latest" aria-label="Download JustAuction on GitHub Releases">Download</a>
+            <a class="family-source" href="https://github.com/filasik/justAuction" aria-label="JustAuction source on GitHub">Source on GitHub</a>
+          </div>
+        </article>
+        <article aria-labelledby="justlogs-title">
+          <div class="family-head">
+            <img src="assets/plugins/justlogs.svg" width="64" height="64" loading="lazy" alt="">
+            <h3 id="justlogs-title">JustLogs</h3>
+          </div>
+          <p>Track block changes and container activity. Inspect who changed what, search the history and roll back damage with a preview before applying changes.</p>
+          <div class="family-actions">
+            <a class="btn small" href="https://github.com/filasik/justLogs/releases/latest" aria-label="Download JustLogs on GitHub Releases">Download</a>
+            <a class="family-source" href="https://github.com/filasik/justLogs" aria-label="JustLogs source on GitHub">Source on GitHub</a>
+          </div>
+        </article>
+        <article aria-labelledby="justpolls-title">
+          <div class="family-head">
+            <img src="assets/plugins/justpolls.svg" width="64" height="64" loading="lazy" alt="">
+            <h3 id="justpolls-title">JustPolls</h3>
+          </div>
+          <p>Run timed in-game polls with native voting dialogs and one vote per player. Schedule recurring polls and optionally share the results on Discord.</p>
+          <div class="family-actions">
+            <a class="btn small" href="https://github.com/filasik/justPolls/releases/latest" aria-label="Download JustPolls on GitHub Releases">Download</a>
+            <a class="family-source" href="https://github.com/filasik/justPolls" aria-label="JustPolls source on GitHub">Source on GitHub</a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
   <section id="faq">
     <div class="wrap">
       <div class="label">FAQ</div>
@@ -582,6 +648,7 @@
         <li><a href="https://github.com/filasik/justLogin/issues">Issue tracker</a></li>
         <li><a href="https://github.com/filasik/justLogin/blob/main/CHANGELOG.md">Changelog</a></li>
         <li><a href="/editor/">Web editor</a></li>
+        <li><a href="#plugins">Plugin family</a></li>
       </ul>
     </div>
     <div>
