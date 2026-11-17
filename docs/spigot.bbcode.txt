@@ -49,7 +49,7 @@
 [*]/register <pw> <pw> (/reg), /login <pw> (/l) — Password auth ([I]justlogin.use[/I])
 [*]/logout, /changepassword (/changepass, /cp), /unregister, /captcha <code> — Account, session & captcha ([I]justlogin.use[/I])
 [*]/email <set|clear|recover> — Email binding & SMTP recovery ([I]justlogin.email[/I])
-[*]/2fa <setup|confirm|disable|verify> — TOTP two-factor authentication ([I]justlogin.2fa[/I])
+[*]/2fa <setup|confirm|cancel|disable|verify> — TOTP two-factor authentication ([I]justlogin.2fa[/I])
 [*]/premium, /unpremium [pw] — Switch between Mojang verification and password login on standalone Paper or proxies ([I]justlogin.premium[/I])
 [*]/skin <player|reset> (/skins) — Change or reset your persistent player skin ([I]justlogin.skin[/I])
 [/LIST]
@@ -103,3 +103,5 @@ JustLogin only contacts these services. Passwords never leave your server.
 [B]Web Editor relay:[/B] https://bytebin.justlogin.net is the default encrypted relay. Existing default configurations are migrated automatically; custom relay URLs are preserved.
 
 /jl editor [page] lists accounts by most recent login first.
+
+[B]2FA QR map:[/B] /2fa setup shows a temporary client-only QR map (120 seconds maximum); no real inventory item or map file is created. /2fa cancel discards setup. Disable with totp.qr-map-enabled: false. Never share screenshots of the QR secret.

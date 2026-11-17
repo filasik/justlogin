@@ -55,12 +55,16 @@ policy:
   common-password: "<red>That password is too common. Choose a stronger password.</red>"
 
 totp:
-  usage: "<yellow>Usage: <white>/2fa <setup|confirm|disable|verify> [code]</white></yellow>"
+  usage: "<yellow>Usage: <white>/2fa <setup|confirm|cancel|disable|verify> [code]</white></yellow>"
   already-enabled: "<yellow>Two-factor authentication is already enabled.</yellow>"
   not-enabled: "<yellow>Two-factor authentication is not enabled on this account.</yellow>"
   no-pending-setup: "<red>No active 2FA setup found. Run <white>/2fa setup</white> first.</red>"
   invalid-code: "<red>Invalid or already used authenticator code.</red>"
   decrypt-error: "<red>Could not decrypt 2FA secret due to a server key mismatch. Contact an administrator (<white>/jl reset2fa</white>).</red>"
+  qr-shown: "<yellow>Scan the QR map with your authenticator. It disappears within 120 seconds or when you switch slots or interact. Never share the QR. Use /2fa cancel to cancel setup.</yellow>"
+  qr-unavailable: "<gray>QR map unavailable on this client/server. Use the manual secret key above.</gray>"
+  setup-busy: "<yellow>A 2FA confirmation is being processed. Please wait.</yellow>"
+  setup-cancelled: "<yellow>Pending 2FA setup cancelled.</yellow>"
   setup-header: "<aqua><bold>2FA Authenticator Setup</bold></aqua>"
   setup-secret: "<gray>Secret key (manual entry): <white><click:copy_to_clipboard:'{secret}'>{secret}</click></white> <dark_gray>(click to copy)</dark_gray></gray>"
   setup-uri: "<gray>Provisioning URI: <aqua><click:copy_to_clipboard:'{uri}'>Copy otpauth:// URI</click></aqua></gray>"
@@ -293,6 +297,11 @@ help:
       desc: "Generate a new TOTP secret and URI for your authenticator app."
       example: "/2fa setup"
       note: "Run /2fa confirm <6-digit-code> within 5 minutes to finish activation."
+    2fa_cancel:
+      syntax: "/2fa cancel"
+      desc: "Cancel pending 2FA setup and hide the QR map."
+      example: "/2fa cancel"
+      note: "Does not disable already active 2FA."
     2fa_confirm:
       syntax: "/2fa confirm <code>"
       desc: "Activate 2FA using a 6-digit code from your authenticator app."

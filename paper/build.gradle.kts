@@ -17,6 +17,7 @@ val bstatsIdProp = rootProject.property("bstatsId") as String
 dependencies {
     implementation(project(":core"))
     implementation(project(":editor"))
+    implementation("com.google.zxing:core:3.5.4")
     implementation("org.bstats:bstats-bukkit:${rootProject.property("bstatsVersion")}")
 
     compileOnly("io.papermc.paper:paper-api:$paperApiVersionProp")
@@ -69,6 +70,7 @@ tasks.processResources {
 tasks.shadowJar {
     archiveBaseName.set(pluginNameProp)
     archiveClassifier.set("")
+    relocate("com.google.zxing", "me.skerik.justlogin.libs.zxing")
     relocate("org.bstats", "me.skerik.justlogin.libs.bstats")
     dependencies {
         exclude(dependency("org.jspecify:.*"))

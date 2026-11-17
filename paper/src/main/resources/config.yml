@@ -6,7 +6,7 @@
 
 # Config format version. Do not change: when you update the plugin, options added in the new version
 # are merged into this file automatically (your values stay, a backup config.yml.bak-v<n> is saved first).
-config-version: 7
+config-version: 8
 
 # Language of all player-facing messages: en, cs, sk.
 # The files plugins/JustLogin/messages_<locale>.yml are yours to edit; missing keys fall back to built-in English.
@@ -88,6 +88,9 @@ sessions:
   duration-seconds: 3600
 
 totp:
+  # Client-only QR map during /2fa setup (120s maximum); never creates an inventory item or saved map.
+  # Changing slot, using/dropping/swapping items, or opening an inventory hides it. Manual key remains available.
+  qr-map-enabled: true
   # Issuer label displayed inside authenticator apps (Google Authenticator, Aegis, 2FAS, etc.)
   issuer: "JustLogin"
   # Allowed clock-drift steps (+/- 30s per step)

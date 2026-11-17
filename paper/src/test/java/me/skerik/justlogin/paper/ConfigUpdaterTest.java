@@ -88,7 +88,7 @@ final class ConfigUpdaterTest {
 
         int added = ConfigUpdater.merge(v2, defaults);
         assertTrue(added > 5);
-        assertEquals(7, v2.getInt("config-version"));
+        assertEquals(8, v2.getInt("config-version"));
         assertEquals("sk", v2.getString("locale"));
         assertFalse(v2.getBoolean("premium.standalone-enabled"));
         assertTrue(v2.getBoolean("login.dialog-single-password"));
@@ -96,6 +96,7 @@ final class ConfigUpdaterTest {
         assertTrue(v2.getBoolean("captcha.enabled"));
         assertFalse(v2.getBoolean("email.enabled"));
         assertFalse(v2.getBoolean("editor.local-http.enabled"));
+        assertTrue(v2.getBoolean("totp.qr-map-enabled"));
         assertTrue(v2.getBoolean("skins.enabled"));
         assertTrue(v2.getBoolean("skins.restore-by-name"));
         assertTrue(v2.getBoolean("skins.command-enabled"));

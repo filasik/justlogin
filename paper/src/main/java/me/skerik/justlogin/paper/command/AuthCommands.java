@@ -141,6 +141,9 @@ public final class AuthCommands {
                         .then(Commands.literal("setup")
                                 .requires(s -> s.getSender().hasPermission("justlogin.2fa"))
                                 .executes(this::handle2faSetup))
+                        .then(Commands.literal("cancel")
+                                .requires(s -> s.getSender().hasPermission("justlogin.2fa"))
+                                .executes(this::handle2faCancel))
                         .then(Commands.literal("confirm")
                                 .requires(s -> s.getSender().hasPermission("justlogin.2fa"))
                                 .executes(c -> usage(c, "totp.usage"))
@@ -289,6 +292,8 @@ public final class AuthCommands {
         PlayerSession session = requireAuthenticated(ctx, c);
         if (session == null) return Command.SINGLE_SUCCESS;
         Player player = (Player) c.getSource().getSender();
+        ctx.totpQrMaps().hide(player);
+        ctx.sessionManager().cancelPendingTotpSetup(player.getUniqueId());
         Account acc = session.account();
         long accountId = acc != null ? acc.id() : -1L;
         boolean passwordless = acc != null && !acc.hasPassword();
@@ -407,6 +412,23 @@ public final class AuthCommands {
         return Command.SINGLE_SUCCESS;
     }
 
+    private int handle2faCancel(CommandContext<CommandSourceStack> c) {
+        Context ctx = readyContext(c.getSource().getSender());
+        if (ctx == null) return Command.SINGLE_SUCCESS;
+        PlayerSession session = requireAuthenticated(ctx, c);
+        if (session == null) return Command.SINGLE_SUCCESS;
+        if (!session.tryBeginOp()) {
+            ctx.messages().send(c.getSource().getSender(), "totp.setup-busy");
+            return Command.SINGLE_SUCCESS;
+        }
+        session.endOp();
+        Player player = (Player) c.getSource().getSender();
+        ctx.totpQrMaps().hide(player);
+        ctx.sessionManager().cancelPendingTotpSetup(player.getUniqueId());
+        ctx.messages().send(player, "totp.setup-cancelled");
+        return Command.SINGLE_SUCCESS;
+    }
+
     private int handle2faSetup(CommandContext<CommandSourceStack> c) {
         Context ctx = readyContext(c.getSource().getSender());
         if (ctx == null) return Command.SINGLE_SUCCESS;
@@ -414,8 +436,18 @@ public final class AuthCommands {
         if (session == null) return Command.SINGLE_SUCCESS;
         Player player = (Player) c.getSource().getSender();
         Messages msg = ctx.messages();
+        if (!session.tryBeginOp()) {
+            msg.send(player, "totp.setup-busy");
+            return Command.SINGLE_SUCCESS;
+        }
+        session.endOp();
+        ctx.totpQrMaps().hide(player);
+        var request = ctx.sessionManager().beginTotpSetupRequest(player.getUniqueId());
         ctx.authService().beginTotpSetup(player.getName()).whenComplete((data, ex) ->
                 ctx.scheduler().runForEntity(player, () -> {
+                    if (!player.isOnline() || !session.isAuthenticated()
+                            || ctx.sessionManager().getSession(player.getUniqueId()) != session
+                            || !ctx.sessionManager().isTotpSetupRequest(player.getUniqueId(), request)) return;
                     if (ex != null) {
                         msg.send(player, "general.internal-error");
                         return;
@@ -436,6 +468,8 @@ public final class AuthCommands {
                     player.sendMessage(msg.component("totp.setup-uri", Map.of("uri", data.otpauthUri()))
                             .clickEvent(ClickEvent.copyToClipboard(data.otpauthUri())));
                     msg.send(player, "totp.setup-confirm");
+                    var pending = ctx.sessionManager().pendingTotpSetup(player.getUniqueId());
+                    if (pending != null) ctx.totpQrMaps().show(player, data.otpauthUri(), pending);
                 }, null));
         return Command.SINGLE_SUCCESS;
     }
@@ -447,30 +481,44 @@ public final class AuthCommands {
         if (session == null) return Command.SINGLE_SUCCESS;
         Player player = (Player) c.getSource().getSender();
         Messages msg = ctx.messages();
+        if (!session.tryBeginOp()) {
+            msg.send(player, "totp.setup-busy");
+            return Command.SINGLE_SUCCESS;
+        }
+        ctx.totpQrMaps().hide(player);
+        var request = ctx.sessionManager().totpSetupRequest(player.getUniqueId());
         var pending = ctx.sessionManager().consumePendingTotpSetup(player.getUniqueId(), System.currentTimeMillis());
         if (pending == null) {
+            session.endOp();
             msg.send(player, "totp.no-pending-setup");
             return Command.SINGLE_SUCCESS;
         }
         ctx.authService().confirmTotpSetup(player.getName(), pending.base32Secret(), code, player.getName())
                 .whenComplete((res, ex) -> ctx.scheduler().runForEntity(player, () -> {
+                    session.endOp();
+                    if (!player.isOnline() || !session.isAuthenticated()
+                            || ctx.sessionManager().getSession(player.getUniqueId()) != session
+                            || request == null || !ctx.sessionManager().isTotpSetupRequest(player.getUniqueId(), request)) return;
                     if (ex != null) {
                         msg.send(player, "general.internal-error");
                         return;
                     }
                     if (res.status() != AuthService.Status.SUCCESS) {
-                        ctx.sessionManager().putPendingTotpSetup(
-                                player.getUniqueId(), pending.base32Secret(), pending.expiresAt());
+                        if (System.currentTimeMillis() < pending.expiresAt()) {
+                            ctx.sessionManager().putPendingTotpSetup(
+                                    player.getUniqueId(), pending.base32Secret(), pending.expiresAt());
+                        }
                         msg.send(player, "totp.invalid-code");
                         return;
                     }
+                    ctx.sessionManager().cancelPendingTotpSetup(player.getUniqueId());
                     msg.send(player, "totp.enabled");
                     for (String backup : res.backupCodes()) {
                         Component line = msg.component("totp.backup-code-line", Map.of("code", backup))
                                 .clickEvent(ClickEvent.copyToClipboard(backup));
                         player.sendMessage(line);
                     }
-                }, null));
+                }, session::endOp));
         return Command.SINGLE_SUCCESS;
     }
 

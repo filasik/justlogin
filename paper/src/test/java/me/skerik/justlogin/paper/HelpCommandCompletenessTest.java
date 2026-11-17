@@ -52,7 +52,7 @@ final class HelpCommandCompletenessTest {
         // 1. AuthCommands literals
         Set<String> authLiterals = extractLiterals(cmdDir.resolve("AuthCommands.java"));
         for (String lit : authLiterals) {
-            if (Set.of("setup", "confirm", "disable", "verify").contains(lit)) {
+            if (Set.of("setup", "confirm", "cancel", "disable", "verify").contains(lit)) {
                 assertTrue(CommandDoc.findByQuery("2fa " + lit).isPresent(),
                         "Missing CommandDoc entry for /2fa " + lit);
             } else {
@@ -109,7 +109,7 @@ final class HelpCommandCompletenessTest {
         assertEquals("jl_changepass", CommandDoc.findByQuery("jl changepassword").orElseThrow().id());
         assertEquals("jl_forcepw", CommandDoc.findByQuery("/jl forcechangepassword").orElseThrow().id());
         assertEquals("jl_help", CommandDoc.findByQuery("?").orElseThrow().id());
-        assertEquals(4, CommandDoc.findAllByQuery("2fa").size());
+        assertEquals(5, CommandDoc.findAllByQuery("2fa").size());
         assertEquals(4, CommandDoc.findAllByQuery("email").size());
         assertEquals(Section.ADMIN, CommandDoc.findSection("admin").orElseThrow());
 

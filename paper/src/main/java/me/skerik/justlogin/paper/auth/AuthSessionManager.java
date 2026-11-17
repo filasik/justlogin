@@ -161,6 +161,10 @@ public final class AuthSessionManager {
     }
 
     public record PendingTotpSetup(String base32Secret, long expiresAt) {
+        @Override
+        public String toString() {
+            return "PendingTotpSetup[secret=REDACTED, expiresAt=" + expiresAt + "]";
+        }
     }
 
     public static final long PRE_AUTH_GRANT_TTL_MS = 30_000L;
@@ -174,6 +178,7 @@ public final class AuthSessionManager {
     private final Map<String, java.util.concurrent.atomic.AtomicInteger> rejectedDuplicatesByName = new ConcurrentHashMap<>();
     private final Map<UUID, PlayerSession> sessionsByUuid = new ConcurrentHashMap<>();
     private final Map<String, PlayerSession> sessionsByName = new ConcurrentHashMap<>();
+    private final Map<UUID, UUID> totpSetupRequests = new ConcurrentHashMap<>();
     private final Map<UUID, PendingTotpSetup> pendingTotpSetups = new ConcurrentHashMap<>();
     private final Map<String, UUID> nonceToPlayerUuid = new ConcurrentHashMap<>();
 
@@ -350,7 +355,7 @@ public final class AuthSessionManager {
             String nonce = removed.activeDialogNonce();
             if (nonce != null) nonceToPlayerUuid.remove(nonce, uuid);
         }
-        pendingTotpSetups.remove(uuid);
+        cancelPendingTotpSetup(uuid);
     }
 
     public boolean isAuthenticated(@Nullable UUID uuid) {
@@ -363,6 +368,31 @@ public final class AuthSessionManager {
         return s != null && s.isAuthenticated();
     }
 
+    /** Invalidates earlier asynchronous setup completions and their secrets. */
+    public UUID beginTotpSetupRequest(UUID uuid) {
+        UUID request = UUID.randomUUID();
+        pendingTotpSetups.remove(uuid);
+        totpSetupRequests.put(uuid, request);
+        return request;
+    }
+
+    public boolean isTotpSetupRequest(UUID uuid, UUID request) {
+        return request.equals(totpSetupRequests.get(uuid));
+    }
+
+    public @Nullable PendingTotpSetup pendingTotpSetup(UUID uuid) {
+        return pendingTotpSetups.get(uuid);
+    }
+
+    public @Nullable UUID totpSetupRequest(UUID uuid) {
+        return totpSetupRequests.get(uuid);
+    }
+
+    public void cancelPendingTotpSetup(UUID uuid) {
+        pendingTotpSetups.remove(uuid);
+        totpSetupRequests.remove(uuid);
+    }
+
     public void putPendingTotpSetup(UUID uuid, String secret, long expiresAt) {
         pendingTotpSetups.put(uuid, new PendingTotpSetup(secret, expiresAt));
     }
@@ -370,12 +400,11 @@ public final class AuthSessionManager {
     public @Nullable PendingTotpSetup consumePendingTotpSetup(UUID uuid, long nowMillis) {
         PendingTotpSetup setup = pendingTotpSetups.get(uuid);
         if (setup == null) return null;
-        if (nowMillis > setup.expiresAt()) {
+        if (nowMillis >= setup.expiresAt()) {
             pendingTotpSetups.remove(uuid, setup);
             return null;
         }
-        pendingTotpSetups.remove(uuid, setup);
-        return setup;
+        return pendingTotpSetups.remove(uuid, setup) ? setup : null;
     }
 
     public void clearAll() {
@@ -392,6 +421,7 @@ public final class AuthSessionManager {
         sessionsByUuid.clear();
         sessionsByName.clear();
         pendingTotpSetups.clear();
+        totpSetupRequests.clear();
         nonceToPlayerUuid.clear();
     }
 }

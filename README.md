@@ -151,13 +151,13 @@ JustLogin only talks to the following services. Nothing else is contacted, and n
 
 ### Standalone Paper Server
 
-1. Drop `JustLogin-1.0.4.jar` into `plugins/` on a **Paper `1.21.7–26.x`** server (`Java 21+`) and start the server.
+1. Drop `JustLogin-1.0.5.jar` into `plugins/` on a **Paper `1.21.7–26.x`** server (`Java 21+`) and start the server.
 2. On first boot, `JustLoginLoader` downloads runtime libraries (`libraries.txt`), generates `plugins/JustLogin/secrets.key`, initializes `plugins/JustLogin/data/justlogin.db` (SQLite), and extracts `messages_en.yml`, `messages_cs.yml`, and `messages_sk.yml`.
 3. Everything works out of the box — including native Configuration-phase Dialogs (`1.21.7+`) and standalone `/premium` verification. Adjust `plugins/JustLogin/config.yml` anytime and run `/jl reload`.
 
 ### Velocity or BungeeCord Network
 
-1. Place `JustLogin-Velocity-1.0.4.jar` on Velocity (or `JustLogin-Bungee-1.0.4.jar` on BungeeCord) and `JustLogin-1.0.4.jar` on every Paper backend.
+1. Place `JustLogin-Velocity-1.0.5.jar` on Velocity (or `JustLogin-Bungee-1.0.5.jar` on BungeeCord) and `JustLogin-1.0.5.jar` on every Paper backend.
 2. Generate a random `proxy.shared-secret` (at least 16 characters) and set the **exact same secret** in both proxy and Paper `config.yml`.
 3. Configure the **same MariaDB database** under `storage` in both proxy and Paper `config.yml`.
 4. Set `proxy.enabled: true` and `proxy.mode: velocity` (or `bungee`) on Paper, matching Paper's native forwarding (`config/paper-global.yml` for Velocity modern forwarding or `spigot.yml` for BungeeCord).
@@ -175,7 +175,7 @@ JustLogin only talks to the following services. Nothing else is contacted, and n
 | `/unregister <pw>` | — | `justlogin.use` | Permanently delete your own account |
 | `/captcha <code>` | — | `justlogin.use` | Complete pre-auth anti-bot captcha challenge |
 | `/email <set\|confirm\|clear\|recover>` | — | `justlogin.email` | Verify/clear recovery email or recover password via SMTP |
-| `/2fa <setup\|confirm\|disable\|verify>` | — | `justlogin.2fa` | Set up, disable, or verify RFC 6238 TOTP 2FA |
+| `/2fa <setup\|confirm\|cancel\|disable\|verify>` | — | `justlogin.2fa` | Set up, cancel setup, disable, or verify RFC 6238 TOTP 2FA |
 | `/premium` | — | `justlogin.premium` | Arm Mojang online auto-login (standalone Paper & proxy) |
 | `/unpremium [password]` | — | `justlogin.premium` | Switch back to password authentication (the `[password]` is only needed if your account has none yet) |
 | `/skin <player\|reset>` | `/skins` | `justlogin.skin` | Change or reset your player skin with persistent storage |
@@ -290,9 +290,9 @@ if (api != null && api.isAuthenticated(player)) {
 ```
 
 Output JARs after build:
-- `paper/build/libs/JustLogin-1.0.4.jar`
-- `velocity/build/libs/JustLogin-Velocity-1.0.4.jar`
-- `bungee/build/libs/JustLogin-Bungee-1.0.4.jar`
+- `paper/build/libs/JustLogin-1.0.5.jar`
+- `velocity/build/libs/JustLogin-Velocity-1.0.5.jar`
+- `bungee/build/libs/JustLogin-Bungee-1.0.5.jar`
 
 ---
 
@@ -316,3 +316,5 @@ Stars, bug reports and migration feedback help just as much.
 The Web Editor uses `https://bytebin.justlogin.net` as its default encrypted relay. Upgrading migrates the previous default automatically; custom relay URLs are preserved.
 
 `/jl editor [page]` exports the most recently logged-in accounts first (up to `editor.page-size` per export).
+
+`/2fa setup` also shows a temporary, client-only authenticator QR map (up to 120 seconds). The actual inventory is unchanged and no map is saved. Use `/2fa cancel` to discard setup or `totp.qr-map-enabled: false` to disable the map. Switching slots or interacting hides it; the manual key remains available. Treat the QR as a secret: screenshots cannot be revoked.

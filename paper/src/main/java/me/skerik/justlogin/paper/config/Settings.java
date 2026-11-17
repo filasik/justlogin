@@ -46,8 +46,57 @@ public record Settings(
         boolean checkUpdates,
         boolean metrics,
         boolean skinsCommandEnabled,
-        long skinCooldownSeconds
+        long skinCooldownSeconds,
+        boolean totpQrMapEnabled
 ) {
+
+
+    /** Backwards-compatible constructor retaining the previous settings signature. */
+    public Settings(
+            String language,
+            UiMode loginUi,
+            int timeoutSeconds,
+            boolean kickDuplicateOnline,
+            boolean fallbackForLegacyClients,
+            boolean titleReminder,
+            boolean dialogSinglePassword,
+            boolean bedrockCumulusForms,
+            boolean captchaEnabled,
+            boolean captchaRequireOnRegister,
+            int captchaTriggerAfterFailures,
+            int captchaLength,
+            int captchaExpireSeconds,
+            CoreSettings core,
+            boolean standalonePremiumEnabled,
+            boolean standalonePreventProxyConnections,
+            boolean premiumFallbackToPassword,
+            boolean proxyEnabled,
+            ProxyMode proxyMode,
+            String proxySharedSecret,
+            boolean requireForwardingConfig,
+            DbConfig dbConfig,
+            SmtpConfig smtpConfig,
+            String editorWebUrl,
+            String editorRelayUrl,
+            int editorPageSize,
+            int editorTtlSeconds,
+            boolean editorLocalHttpEnabled,
+            String editorLocalHttpBind,
+            int editorLocalHttpPort,
+            boolean checkUpdates,
+            boolean metrics,
+            boolean skinsCommandEnabled,
+            long skinCooldownSeconds
+    ) {
+        this(language, loginUi, timeoutSeconds, kickDuplicateOnline, fallbackForLegacyClients, titleReminder,
+                dialogSinglePassword, bedrockCumulusForms, captchaEnabled, captchaRequireOnRegister,
+                captchaTriggerAfterFailures, captchaLength, captchaExpireSeconds,
+                core, standalonePremiumEnabled, standalonePreventProxyConnections, premiumFallbackToPassword,
+                proxyEnabled, proxyMode, proxySharedSecret, requireForwardingConfig,
+                dbConfig, smtpConfig, editorWebUrl, editorRelayUrl, editorPageSize, editorTtlSeconds,
+                editorLocalHttpEnabled, editorLocalHttpBind, editorLocalHttpPort, checkUpdates, metrics,
+                skinsCommandEnabled, skinCooldownSeconds, true);
+    }
 
     /** Backwards-compatible 32-arg constructor. */
     public Settings(
@@ -332,7 +381,7 @@ public record Settings(
                 proxyEnabled, proxyMode, sharedSecret, requireFwd, dbConfig, smtp,
                 webUrl, relayUrl, pageSize, ttlSeconds,
                 localHttpEnabled, localHttpBind, localHttpPort,
-                checkUpdates, metrics, skinsCommandEnabled, skinCooldownSeconds
+                checkUpdates, metrics, skinsCommandEnabled, skinCooldownSeconds, cfg.getBoolean("totp.qr-map-enabled", true)
         );
     }
 

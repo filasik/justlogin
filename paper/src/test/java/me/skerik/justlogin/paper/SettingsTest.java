@@ -24,6 +24,9 @@ final class SettingsTest {
         assertEquals("https://bytebin.justlogin.net", s.editorRelayUrl());
         cfg.set("editor.relay-url", null);
         assertEquals("https://bytebin.justlogin.net", Settings.load(cfg, Path.of("/tmp/justlogin-test")).editorRelayUrl());
+        assertTrue(s.totpQrMapEnabled());
+        cfg.set("totp.qr-map-enabled", false);
+        assertFalse(Settings.load(cfg, Path.of("/tmp/justlogin-test")).totpQrMapEnabled());
         assertEquals("en", s.language());
         assertTrue(s.checkUpdates());
         assertTrue(s.metrics());

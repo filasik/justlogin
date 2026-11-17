@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.5] - 2026-11-17
+
+### Added
+- `/2fa setup` can show a locally generated authenticator QR code on a client-only map in the player's held slot (`totp.qr-map-enabled: true`, config version 8). The real inventory and world map storage are never modified; no external QR service is used.
+- QR display is cleared on confirmation, cancellation, replacement, logout/disconnect, death, teleport, inventory interactions, slot changes, item drops/swaps/use, and after at most 120 seconds. The original slot is restored from the current server inventory; map pixels are overwritten with a blank image. Shutdown also blanks active maps and restores their captured slot display without accessing another Folia region's inventory.
+- `/2fa cancel` discards pending setup. Manual secret/URI provisioning remains available when QR display is disabled or unavailable. A new setup or disconnect invalidates stale asynchronous setup callbacks.
+
+### Security
+- Pending TOTP secrets are consumed atomically; setup/cancellation cannot replace an in-flight confirmation. Diagnostic string representations redact the pending secret.
+- A QR code contains the TOTP secret: screenshots and modified clients can retain it despite display cleanup. Setup still requires authentication and a valid first TOTP code before 2FA is enabled; pending setup expires after five minutes.
+
 ## [1.0.4] - 2026-11-17
 
 ### Changed

@@ -131,6 +131,7 @@ public final class JustLogin extends JavaPlugin {
         Context ctx = new Context(this, scheduler, initialSettings, earlyMessages, database, secrets);
         ctx.standalonePremium().install();
         getServer().getPluginManager().registerEvents(ctx.adminGui(), this);
+        getServer().getPluginManager().registerEvents(ctx.totpQrMaps(), this);
         getServer().getServicesManager().register(
                 JustLoginAPI.class, new JustLoginApiImpl(ctx), this, ServicePriority.Normal);
         this.context = ctx;
@@ -216,6 +217,7 @@ public final class JustLogin extends JavaPlugin {
             getServer().getServicesManager().unregisterAll(this);
             context.closeLocalEditor();
             context.standalonePremium().uninstall();
+            context.totpQrMaps().close();
             context.sessionManager().clearAll();
             context.hashing().close();
             context.database().close();

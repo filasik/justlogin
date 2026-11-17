@@ -55,12 +55,16 @@ policy:
   common-password: "<red>Toto heslo je příliš běžné. Zvol silnější heslo.</red>"
 
 totp:
-  usage: "<yellow>Použití: <white>/2fa <setup|confirm|disable|verify> [kód]</white></yellow>"
+  usage: "<yellow>Použití: <white>/2fa <setup|confirm|cancel|disable|verify> [kód]</white></yellow>"
   already-enabled: "<yellow>Dvoufaktorové ověření je již zapnuté.</yellow>"
   not-enabled: "<yellow>Dvoufaktorové ověření není na tomto účtu zapnuté.</yellow>"
   no-pending-setup: "<red>Nebylo nalezeno rozpracované nastavení 2FA. Spusť nejprve <white>/2fa setup</white>.</red>"
   invalid-code: "<red>Neplatný nebo již použitý ověřovací kód.</red>"
   decrypt-error: "<red>Nepodařilo se dešifrovat 2FA klíč kvůli neshodě klíče serveru. Kontaktuj administrátora (<white>/jl reset2fa</white>).</red>"
+  qr-shown: "<yellow>Naskenuj QR na mapě autentizační aplikací. Zmizí do 120 sekund nebo při změně slotu či interakci. QR nikomu nesdílej. Nastavování zrušíš pomocí /2fa cancel.</yellow>"
+  qr-unavailable: "<gray>QR mapa na tomto klientovi/serveru není dostupná. Použij ruční klíč výše.</gray>"
+  setup-busy: "<yellow>Právě se zpracovává potvrzení 2FA. Chvíli počkej.</yellow>"
+  setup-cancelled: "<yellow>Rozpracované nastavení 2FA bylo zrušeno.</yellow>"
   setup-header: "<aqua><bold>Nastavení 2FA autentikátoru</bold></aqua>"
   setup-secret: "<gray>Tajný klíč (ruční zadání): <white><click:copy_to_clipboard:'{secret}'>{secret}</click></white> <dark_gray>(kliknutím zkopíruješ)</dark_gray></gray>"
   setup-uri: "<gray>URI pro aplikaci: <aqua><click:copy_to_clipboard:'{uri}'>Zkopírovat otpauth:// URI</click></aqua></gray>"
@@ -293,6 +297,11 @@ help:
       desc: "Vygeneruje nový TOTP klíč a URI pro mobilní autentikátor."
       example: "/2fa setup"
       note: "Aktivaci dokonči příkazem /2fa confirm <6místný-kód> do 5 minut."
+    2fa_cancel:
+      syntax: "/2fa cancel"
+      desc: "Zruší rozpracované nastavení 2FA a skryje QR mapu."
+      example: "/2fa cancel"
+      note: "Nevypne již aktivní 2FA."
     2fa_confirm:
       syntax: "/2fa confirm <code>"
       desc: "Aktivuje 2FA pomocí 6místného kódu z aplikace."

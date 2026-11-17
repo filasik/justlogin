@@ -88,7 +88,7 @@ public final class CommandDoc {
          */
         public String suggestCommand() {
             return switch (id) {
-                case "logout", "2fa_setup", "premium", "email_clear", "jl_help", "jl_reload", "jl_gui", "jl_editor" ->
+                case "logout", "2fa_setup", "2fa_cancel", "premium", "email_clear", "jl_help", "jl_reload", "jl_gui", "jl_editor" ->
                         primaryLiteral;
                 default -> primaryLiteral + " ";
             };
@@ -158,6 +158,17 @@ public final class CommandDoc {
                     "2fa_setup",
                     "/2fa setup",
                     "2fa setup",
+                    Section.TOTP,
+                    "justlogin.2fa",
+                    List.of(),
+                    Availability.ALWAYS,
+                    false,
+                    false
+            ),
+            new Entry(
+                    "2fa_cancel",
+                    "/2fa cancel",
+                    "2fa cancel",
                     Section.TOTP,
                     "justlogin.2fa",
                     List.of(),
@@ -497,7 +508,7 @@ public final class CommandDoc {
     }
 
     /**
-     * Returns all matching entries for a query (e.g. {@code "2fa"} returns all 4 TOTP subcommands,
+     * Returns all matching entries for a query (e.g. {@code "2fa"} returns all TOTP subcommands,
      * {@code "email"} returns all 4 email subcommands, and specific queries return the matching entry).
      */
     public static List<Entry> findAllByQuery(@Nullable String query) {

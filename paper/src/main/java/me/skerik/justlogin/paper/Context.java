@@ -34,6 +34,7 @@ import me.skerik.justlogin.paper.config.Settings;
 import me.skerik.justlogin.paper.dialog.DialogUi;
 import me.skerik.justlogin.paper.dialog.PaperDialogUi;
 import me.skerik.justlogin.paper.gui.AdminGui;
+import me.skerik.justlogin.paper.totp.TotpQrMapManager;
 import me.skerik.justlogin.paper.premium.StandaloneLoginBridge;
 import me.skerik.justlogin.paper.premium.StandalonePremiumManager;
 import me.skerik.justlogin.paper.util.ClientCapabilityCheck;
@@ -65,6 +66,7 @@ public final class Context {
     private final CaptchaManager captchaManager;
     private final DialogUi dialogUi;
     private final AdminGui adminGui;
+    private final TotpQrMapManager totpQrMaps;
     private final ClientCapabilityCheck capabilities;
     private final PaperAuthCoordinator coordinator;
     private final StandalonePremiumManager standalonePremium;
@@ -133,6 +135,7 @@ public final class Context {
                 () -> this.settings.skinsCacheSeconds(), System::currentTimeMillis);
         this.skinClient = new MojangSkinClient(
                 skinMojangApi, () -> this.settings.skinsCacheSeconds(), System::currentTimeMillis);
+        this.totpQrMaps = new TotpQrMapManager(this);
         applyProxySettings(initialSettings);
         applyEditorSettings(initialSettings);
     }
@@ -238,6 +241,8 @@ public final class Context {
     public AuthSessionManager sessionManager() { return sessionManager; }
     public CaptchaManager captchaManager() { return captchaManager; }
     public DialogUi dialogUi() { return dialogUi; }
+    public TotpQrMapManager totpQrMaps() { return totpQrMaps; }
+
     public AdminGui adminGui() { return adminGui; }
     public ClientCapabilityCheck capabilities() { return capabilities; }
     public PaperAuthCoordinator coordinator() { return coordinator; }
