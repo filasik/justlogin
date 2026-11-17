@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.3] - 2026-11-17
+
+### Fixed
+- Editor links now include the configured relay URL, so the browser reads and writes against the same relay as the plugin instead of failing with HTTP 404 when its default differs. Encryption keys remain in the URL fragment.
+- Web Editor uploads now use the JustLogin-hosted relay at `https://bytebin.justlogin.net` instead of `bytebin.lucko.me`, which rejected uploads with HTTP 403. Updated both the plugin and hosted/bundled editor defaults.
+- Existing configs using the previous default relay (with or without a trailing slash) migrate automatically to the new address (`config-version: 7`). Custom relay URLs are preserved.
+
 ## [1.0.2] - 2026-11-17
 
 ### Fixed

@@ -151,13 +151,13 @@ JustLogin only talks to the following services. Nothing else is contacted, and n
 
 ### Standalone Paper Server
 
-1. Drop `JustLogin-1.0.2.jar` into `plugins/` on a **Paper `1.21.7–26.x`** server (`Java 21+`) and start the server.
+1. Drop `JustLogin-1.0.3.jar` into `plugins/` on a **Paper `1.21.7–26.x`** server (`Java 21+`) and start the server.
 2. On first boot, `JustLoginLoader` downloads runtime libraries (`libraries.txt`), generates `plugins/JustLogin/secrets.key`, initializes `plugins/JustLogin/data/justlogin.db` (SQLite), and extracts `messages_en.yml`, `messages_cs.yml`, and `messages_sk.yml`.
 3. Everything works out of the box — including native Configuration-phase Dialogs (`1.21.7+`) and standalone `/premium` verification. Adjust `plugins/JustLogin/config.yml` anytime and run `/jl reload`.
 
 ### Velocity or BungeeCord Network
 
-1. Place `JustLogin-Velocity-1.0.2.jar` on Velocity (or `JustLogin-Bungee-1.0.2.jar` on BungeeCord) and `JustLogin-1.0.2.jar` on every Paper backend.
+1. Place `JustLogin-Velocity-1.0.3.jar` on Velocity (or `JustLogin-Bungee-1.0.3.jar` on BungeeCord) and `JustLogin-1.0.3.jar` on every Paper backend.
 2. Generate a random `proxy.shared-secret` (at least 16 characters) and set the **exact same secret** in both proxy and Paper `config.yml`.
 3. Configure the **same MariaDB database** under `storage` in both proxy and Paper `config.yml`.
 4. Set `proxy.enabled: true` and `proxy.mode: velocity` (or `bungee`) on Paper, matching Paper's native forwarding (`config/paper-global.yml` for Velocity modern forwarding or `spigot.yml` for BungeeCord).
@@ -290,9 +290,9 @@ if (api != null && api.isAuthenticated(player)) {
 ```
 
 Output JARs after build:
-- `paper/build/libs/JustLogin-1.0.2.jar`
-- `velocity/build/libs/JustLogin-Velocity-1.0.2.jar`
-- `bungee/build/libs/JustLogin-Bungee-1.0.2.jar`
+- `paper/build/libs/JustLogin-1.0.3.jar`
+- `velocity/build/libs/JustLogin-Velocity-1.0.3.jar`
+- `bungee/build/libs/JustLogin-Bungee-1.0.3.jar`
 
 ---
 
@@ -312,3 +312,5 @@ JustLogin is free and MIT-licensed, and every security feature stays free. If it
 - [Donate via PayPal](https://www.paypal.com/donate/?hosted_button_id=94D2D46EHKU5S)
 
 Stars, bug reports and migration feedback help just as much.
+
+The Web Editor uses `https://bytebin.justlogin.net` as its default encrypted relay. Upgrading migrates the previous default automatically; custom relay URLs are preserved.

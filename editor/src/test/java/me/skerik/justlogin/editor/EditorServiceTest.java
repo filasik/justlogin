@@ -86,6 +86,10 @@ class EditorServiceTest {
                     1, 50, "https://example.invalid/editor", relay, EditorService.DEFAULT_TTL_MILLIS).join();
             assertEquals(3, exported.exportedCount());
             assertTrue(exported.editorUrl().contains("#"));
+            String query = java.net.URI.create(exported.editorUrl()).getRawQuery();
+            String encodedRelay = java.util.Arrays.stream(query.split("&"))
+                    .filter(part -> part.startsWith("relay=")).findFirst().orElseThrow().substring(6);
+            assertEquals(relayUrl, java.net.URLDecoder.decode(encodedRelay, java.nio.charset.StandardCharsets.UTF_8));
 
             // Threat #13: verify decrypted export JSON excludes hashes, TOTP secrets, and IP hashes
             String fragmentKey = exported.editorUrl().substring(exported.editorUrl().indexOf('#') + 1);

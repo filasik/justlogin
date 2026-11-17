@@ -6,7 +6,7 @@
 
 # Config format version. Do not change: when you update the plugin, options added in the new version
 # are merged into this file automatically (your values stay, a backup config.yml.bak-v<n> is saved first).
-config-version: 6
+config-version: 7
 
 # Language of all player-facing messages: en, cs, sk.
 # The files plugins/JustLogin/messages_<locale>.yml are yours to edit; missing keys fall back to built-in English.
@@ -148,7 +148,8 @@ storage:
 editor:
   # Hosted client-side web editor URL (live at https://justlogin.net; encryption key stays in the URL #fragment)
   web-url: "https://justlogin.net"
-  relay-url: "https://bytebin.lucko.me"
+  # JustLogin-hosted encrypted blob relay; set your own Bytebin-compatible URL if preferred.
+  relay-url: "https://bytebin.justlogin.net"
   page-size: 500
   ttl-seconds: 1800
   local-http:

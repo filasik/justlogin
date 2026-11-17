@@ -88,7 +88,7 @@ final class ConfigUpdaterTest {
 
         int added = ConfigUpdater.merge(v2, defaults);
         assertTrue(added > 5);
-        assertEquals(6, v2.getInt("config-version"));
+        assertEquals(7, v2.getInt("config-version"));
         assertEquals("sk", v2.getString("locale"));
         assertFalse(v2.getBoolean("premium.standalone-enabled"));
         assertTrue(v2.getBoolean("login.dialog-single-password"));
@@ -101,4 +101,18 @@ final class ConfigUpdaterTest {
         assertTrue(v2.getBoolean("skins.command-enabled"));
         assertEquals(60, v2.getInt("skins.cooldown-seconds"));
     }
+    @Test
+    void migrateOldRelayAndPreserveCustomRelay() {
+        YamlConfiguration user = new YamlConfiguration();
+        for (String old : new String[] {"https://bytebin.lucko.me", "https://bytebin.lucko.me/"}) {
+            user.set("editor.relay-url", old);
+            assertEquals(1, ConfigUpdater.migrate(user, ConfigUpdater.RENAMES));
+            assertEquals("https://bytebin.justlogin.net", user.getString("editor.relay-url"));
+            assertEquals(0, ConfigUpdater.migrate(user, ConfigUpdater.RENAMES));
+        }
+        user.set("editor.relay-url", "https://relay.example.org");
+        assertEquals(0, ConfigUpdater.migrate(user, ConfigUpdater.RENAMES));
+        assertEquals("https://relay.example.org", user.getString("editor.relay-url"));
+    }
+
 }

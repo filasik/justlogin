@@ -76,6 +76,11 @@ public final class ConfigUpdater {
             user.set("editor.web-url", "https://justlogin.net");
             moved++;
         }
+        String relay = user.getString("editor.relay-url");
+        if ("https://bytebin.lucko.me".equals(relay) || "https://bytebin.lucko.me/".equals(relay)) {
+            user.set("editor.relay-url", "https://bytebin.justlogin.net");
+            moved++;
+        }
         return moved;
     }
 

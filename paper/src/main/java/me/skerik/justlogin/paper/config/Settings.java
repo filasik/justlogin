@@ -267,7 +267,7 @@ public record Settings(
         }
 
         String webUrl = cfg.getString("editor.web-url", "https://justlogin.net");
-        String relayUrl = cfg.getString("editor.relay-url", "https://bytebin.lucko.me");
+        String relayUrl = cfg.getString("editor.relay-url", "https://bytebin.justlogin.net");
         int pageSize = Math.max(10, Math.min(2000, cfg.getInt("editor.page-size", 500)));
         int ttlSeconds = Math.max(60, cfg.getInt("editor.ttl-seconds", 1800));
         boolean localHttpEnabled = cfg.getBoolean("editor.local-http.enabled", false);

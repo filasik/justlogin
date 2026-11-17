@@ -2,6 +2,8 @@ package me.skerik.justlogin.editor;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -99,7 +101,7 @@ public final class EditorService {
                                 ? webEditorUrl + "/"
                                 : webEditorUrl;
                         String sep = base.contains("?") ? "&" : "?";
-                        String fullUrl = base + sep + "session=" + sessionId + "&code=" + blobKey + "#" + EditorCrypto.encodeKey(key);
+                        String fullUrl = base + sep + "session=" + sessionId + "&code=" + blobKey + "&relay=" + URLEncoder.encode(relay.relayUrl(), StandardCharsets.UTF_8) + "#" + EditorCrypto.encodeKey(key);
                         return new ExportSessionResult(sessionId, blobKey, fullUrl, exported.size(), total, expiresAt);
                     });
                 })

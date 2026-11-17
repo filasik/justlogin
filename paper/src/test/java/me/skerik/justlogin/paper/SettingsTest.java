@@ -21,6 +21,9 @@ final class SettingsTest {
         }
 
         Settings s = Settings.load(cfg, Path.of("/tmp/justlogin-test"));
+        assertEquals("https://bytebin.justlogin.net", s.editorRelayUrl());
+        cfg.set("editor.relay-url", null);
+        assertEquals("https://bytebin.justlogin.net", Settings.load(cfg, Path.of("/tmp/justlogin-test")).editorRelayUrl());
         assertEquals("en", s.language());
         assertTrue(s.checkUpdates());
         assertTrue(s.metrics());

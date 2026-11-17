@@ -20,6 +20,10 @@ public final class BytebinClient {
         this.relayUrl = relayUrl.endsWith("/") ? relayUrl.substring(0, relayUrl.length() - 1) : relayUrl;
     }
 
+    public String relayUrl() {
+        return relayUrl;
+    }
+
     public CompletableFuture<String> upload(String encryptedJson) {
         HttpRequest req = HttpRequest.newBuilder(URI.create(relayUrl + "/post"))
                 .timeout(Duration.ofSeconds(10))
