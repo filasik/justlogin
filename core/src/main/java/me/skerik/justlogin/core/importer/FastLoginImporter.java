@@ -27,6 +27,10 @@ import org.jspecify.annotations.Nullable;
  * Fixes P0-6: when upgrading an AuthMe-imported account whose {@code game_uuid} is still the synthetic
  * offline UUID, replaces {@code game_uuid} with the player's Mojang UUID so premium players keep their
  * pre-migration inventory and permissions.
+ *
+ * <p>When {@code preserveGameUuid} is true (FastLogin ran with {@code premiumUuid: false}, or the admin passed
+ * {@code --keep-offline-uuid}) {@code game_uuid} is never touched: only {@code premium = 1} and {@code premium_uuid}
+ * are set, and new accounts get the offline UUID as {@code game_uuid}. Default is {@code false} (rewrite).
  */
 public final class FastLoginImporter {
 
@@ -37,10 +41,16 @@ public final class FastLoginImporter {
             int importedNew,
             int updatedExisting,
             int skipped,
-            List<SkippedEntry> skippedDetails
+            List<SkippedEntry> skippedDetails,
+            boolean preserveGameUuid,
+            int gameUuidRewrites
     ) {
         public ImportReport(int importedNew, int updatedExisting, int skipped) {
             this(importedNew, updatedExisting, skipped, List.of());
+        }
+
+        public ImportReport(int importedNew, int updatedExisting, int skipped, List<SkippedEntry> skippedDetails) {
+            this(importedNew, updatedExisting, skipped, skippedDetails, false, 0);
         }
     }
 
@@ -79,11 +89,26 @@ public final class FastLoginImporter {
     public static CompletableFuture<ImportReport> importFromJdbc(
             String jdbcUrl, @Nullable String user, @Nullable String password, String tableName,
             AccountStore accounts, AuditStore audit, String actor, boolean dryRun, long now) {
+        return importFromJdbc(jdbcUrl, user, password, tableName, accounts, audit, actor, dryRun, false, now);
+    }
+
+    public static CompletableFuture<ImportReport> importFromSqlite(
+            String sqlitePath, String tableName, AccountStore accounts, AuditStore audit,
+            String actor, boolean dryRun, boolean preserveGameUuid, long now) {
+        return importFromJdbc("jdbc:sqlite:" + sqlitePath, null, null, tableName, accounts, audit, actor,
+                dryRun, preserveGameUuid, now);
+    }
+
+    public static CompletableFuture<ImportReport> importFromJdbc(
+            String jdbcUrl, @Nullable String user, @Nullable String password, String tableName,
+            AccountStore accounts, AuditStore audit, String actor, boolean dryRun,
+            boolean preserveGameUuid, long now) {
         String safeTable = validateIdentifier(tableName);
         return CompletableFuture.supplyAsync(() -> {
             int importedNew = 0;
             int updatedExisting = 0;
             int skipped = 0;
+            int gameUuidRewrites = 0;
             List<SkippedEntry> skippedDetails = new ArrayList<>();
 
             try (Connection conn = (user == null || user.isBlank())
@@ -124,13 +149,16 @@ public final class FastLoginImporter {
                             boolean isOfflineUuid = acc.gameUuid().equals(AuthMeImporter.offlineUuid(acc.lastName()))
                                     || acc.gameUuid().equals(AuthMeImporter.offlineUuid(acc.nameLower()))
                                     || acc.gameUuid().equals(AuthMeImporter.offlineUuid(displayName));
+                            boolean rewrite = isOfflineUuid && !preserveGameUuid;
                             if (dryRun) {
                                 updatedExisting++;
+                                if (rewrite) gameUuidRewrites++;
                             } else {
                                 boolean applied = accounts.applyImportedFastLoginPremium(
-                                        acc.id(), mojangUuid, isOfflineUuid, nameLower, displayName, now).join();
+                                        acc.id(), mojangUuid, rewrite, nameLower, displayName, now).join();
                                 if (applied) {
                                     updatedExisting++;
+                                    if (rewrite) gameUuidRewrites++;
                                 } else {
                                     skipped++;
                                     skippedDetails.add(new SkippedEntry(displayName, "premium_uuid_conflict"));
@@ -146,8 +174,9 @@ public final class FastLoginImporter {
                             skippedDetails.add(new SkippedEntry(displayName, "already_configured"));
                         }
                     } else if (isPremium && mojangUuid != null) {
+                        UUID newGameUuid = preserveGameUuid ? AuthMeImporter.offlineUuid(displayName) : mojangUuid;
                         if (dryRun) {
-                            boolean conflict = accounts.findByGameUuid(mojangUuid).join().isPresent()
+                            boolean conflict = accounts.findByGameUuid(newGameUuid).join().isPresent()
                                     || accounts.findByPremiumUuid(mojangUuid).join().isPresent();
                             if (conflict) {
                                 skipped++;
@@ -157,7 +186,7 @@ public final class FastLoginImporter {
                             }
                         } else {
                             boolean ok = accounts.importIfAbsent(
-                                    nameLower, displayName, mojangUuid, mojangUuid, null,
+                                    nameLower, displayName, newGameUuid, mojangUuid, null,
                                     HashAlgorithm.NONE, true, now, now, null, now).join();
                             if (ok) {
                                 importedNew++;
@@ -178,10 +207,12 @@ public final class FastLoginImporter {
 
             if (!dryRun) {
                 audit.record(now, actor, "IMPORT_FASTLOGIN", safeTable,
-                        "importedNew=" + importedNew + ",updatedExisting=" + updatedExisting + ",skipped=" + skipped)
+                        "importedNew=" + importedNew + ",updatedExisting=" + updatedExisting + ",skipped=" + skipped
+                                + ",preserveGameUuid=" + preserveGameUuid + ",gameUuidRewrites=" + gameUuidRewrites)
                         .join();
             }
-            return new ImportReport(importedNew, updatedExisting, skipped, List.copyOf(skippedDetails));
+            return new ImportReport(importedNew, updatedExisting, skipped, List.copyOf(skippedDetails),
+                    preserveGameUuid, gameUuidRewrites);
         });
     }
 

@@ -711,4 +711,130 @@ final class ImporterTest {
         MessageDigest md = MessageDigest.getInstance(algo);
         return HexFormat.of().formatHex(md.digest(input.getBytes(StandardCharsets.UTF_8)));
     }
+
+    @Test
+    void mysqlSslModeIsParsedFromLegacyConfigsOverrideAndFallback(@TempDir Path tmp) throws Exception {
+        Path authMe = Files.createDirectories(tmp.resolve("AuthMe"));
+        Files.writeString(authMe.resolve("config.yml"), """
+                DataSource:
+                  backend: 'MARIADB'
+                  mySQLHost: '10.0.0.5'
+                  mySQLPort: '3306'
+                  mySQLDatabase: 'auth'
+                  mySQLUsername: 'u'
+                  mySQLPassword: 'p'
+                  mySQLUseSSL: false
+                """, StandardCharsets.UTF_8);
+        Path fl = Files.createDirectories(tmp.resolve("FastLogin"));
+        Files.writeString(fl.resolve("config.yml"), """
+                driver: 'mariadb'
+                host: '10.0.0.5'
+                database: 'fl'
+                username: 'u'
+                password: 'p'
+                sslMode: 'REQUIRED'
+                """, StandardCharsets.UTF_8);
+
+        List<MigrationScanner.DetectedSource> d = MigrationScanner.scan(tmp);
+        assertEquals("jdbc:mariadb://10.0.0.5:3306/auth?sslMode=disable", d.get(0).jdbcUrl(), "useSSL=false -> disable");
+        assertEquals("jdbc:mariadb://10.0.0.5:3306/fl?sslMode=trust", d.get(1).jdbcUrl(), "REQUIRED -> trust");
+
+        // explicit override beats the legacy config
+        d = MigrationScanner.scan(tmp, new MigrationScanner.ScanOptions("verify-ca", "trust", null));
+        assertEquals("jdbc:mariadb://10.0.0.5:3306/auth?sslMode=verify-ca", d.get(0).jdbcUrl());
+
+        // fallback only applies when the legacy config is silent
+        Files.writeString(authMe.resolve("config.yml"), """
+                DataSource:
+                  backend: 'MARIADB'
+                  mySQLHost: '10.0.0.5'
+                  mySQLDatabase: 'auth'
+                """, StandardCharsets.UTF_8);
+        d = MigrationScanner.scan(tmp, new MigrationScanner.ScanOptions(null, "trust", null));
+        assertEquals("jdbc:mariadb://10.0.0.5:3306/auth?sslMode=trust", d.get(0).jdbcUrl());
+        d = MigrationScanner.scan(tmp);
+        assertEquals("jdbc:mariadb://10.0.0.5:3306/auth", d.get(0).jdbcUrl(), "no TLS info -> bare URL (driver default)");
+
+        assertEquals("trust", MigrationScanner.normalizeSslMode("TRUE"));
+        assertEquals("verify-full", MigrationScanner.normalizeSslMode("VERIFY_IDENTITY"));
+        assertNull(MigrationScanner.normalizeSslMode("bogus"));
+        assertEquals("jdbc:mariadb://h:3306/db?sslMode=trust",
+                MigrationScanner.DetectedSource.mysql(MigrationScanner.SourceType.AUTHME, "h", 3306, "db", "u", "p", "t", "trust").jdbcUrl());
+    }
+
+    @Test
+    void fastLoginPremiumUuidFalseOrFlagKeepsOfflineGameUuid() throws Exception {
+        UUID mojang = UUID.fromString("069a79f4-44e9-4726-a5be-fca90e38aaf5");
+        for (String mode : new String[] {"config-false", "config-true", "flag-keep", "flag-rewrite-over-false"}) {
+            Path root = Files.createDirectories(dir.resolve("run-" + mode));
+            Path plugins = Files.createDirectories(root.resolve("plugins"));
+            Path authMeDir = Files.createDirectories(plugins.resolve("AuthMe"));
+            Path flDir = Files.createDirectories(plugins.resolve("FastLogin"));
+            Files.writeString(authMeDir.resolve("config.yml"), "DataSource:\n  backend: 'SQLITE'\n", StandardCharsets.UTF_8);
+            boolean cfgFalse = mode.equals("config-false") || mode.equals("flag-rewrite-over-false");
+            Files.writeString(flDir.resolve("config.yml"),
+                    "driver: 'org.sqlite.JDBC'\ndatabase: '{pluginDir}/FastLogin.db'\npremiumUuid: " + !cfgFalse + "\n",
+                    StandardCharsets.UTF_8);
+            try (Connection c = DriverManager.getConnection("jdbc:sqlite:" + authMeDir.resolve("authme.db"));
+                 Statement st = c.createStatement()) {
+                st.execute("CREATE TABLE authme (id INTEGER PRIMARY KEY AUTOINCREMENT, username VARCHAR(255) NOT NULL,"
+                        + " realname VARCHAR(255) NOT NULL, password VARCHAR(255) NOT NULL)");
+                st.execute("INSERT INTO authme (username, realname, password) VALUES ('notch', 'Notch', '" + SAMPLE_SHA256_HASH + "')");
+            }
+            try (Connection c = DriverManager.getConnection("jdbc:sqlite:" + flDir.resolve("FastLogin.db"));
+                 Statement st = c.createStatement()) {
+                st.execute("CREATE TABLE premium (UserID INTEGER PRIMARY KEY AUTOINCREMENT, UUID CHAR(36),"
+                        + " Name VARCHAR(16) NOT NULL, Premium BOOLEAN NOT NULL)");
+                st.execute("INSERT INTO premium (UUID, Name, Premium) VALUES ('" + mojang + "', 'Notch', 1)");
+                st.execute("INSERT INTO premium (UUID, Name, Premium) VALUES ('"
+                        + UUID.fromString("853c80ef-3c37-49fd-aa49-938b674adae6") + "', 'FlOnly', 1)");
+            }
+            Boolean override = switch (mode) {
+                case "flag-keep" -> Boolean.TRUE;
+                case "flag-rewrite-over-false" -> Boolean.FALSE;
+                default -> null;
+            };
+            boolean expectKeep = mode.equals("config-false") || mode.equals("flag-keep");
+
+            List<MigrationScanner.DetectedSource> detected =
+                    MigrationScanner.scan(plugins, new MigrationScanner.ScanOptions(null, null, override));
+            MigrationScanner.DetectedSource flSrc = detected.stream()
+                    .filter(x -> x.type() == MigrationScanner.SourceType.FASTLOGIN).findFirst().orElseThrow();
+            assertEquals(expectKeep, flSrc.preserveGameUuid(), mode);
+            assertTrue(flSrc.summary().contains(expectKeep ? "game_uuid=keep-offline" : "game_uuid=rewrite-to-mojang"), flSrc.summary());
+
+            try (Database db = new Database(DbConfig.memory())) {
+                Migrations.migrate(db);
+                AccountStore accounts = new AccountStore(db);
+                AuditStore audit = new AuditStore(db);
+                MigrationScanner.AutoMigrationSummary dry = MigrationScanner.importAll(
+                        detected, accounts, audit, ServerSecrets.generateEphemeral(), "Console", true, null, 1_700_000_000_000L).join();
+                assertTrue(dry.results().stream().anyMatch(r -> r.note() != null
+                        && r.note().contains(expectKeep ? "keeping offline game_uuid" : "rewritten")), mode);
+                assertEquals(0L, accounts.countAccounts().join());
+
+                MigrationScanner.importAll(detected, accounts, audit, ServerSecrets.generateEphemeral(),
+                        "Console", false, null, 1_700_000_005_000L).join();
+
+                Account notch = accounts.findByNameLower("notch").join().orElseThrow();
+                assertEquals(mojang, notch.premiumUuid(), mode);
+                assertTrue(notch.isPremiumConfirmed(), mode);
+                assertEquals(expectKeep ? AuthMeImporter.offlineUuid("Notch") : mojang, notch.gameUuid(), mode);
+
+                Account flOnly = accounts.findByNameLower("flonly").join().orElseThrow();
+                assertEquals(UUID.fromString("853c80ef-3c37-49fd-aa49-938b674adae6"), flOnly.premiumUuid(), mode);
+                assertEquals(expectKeep ? AuthMeImporter.offlineUuid("FlOnly") : flOnly.premiumUuid(), flOnly.gameUuid(), mode);
+            }
+        }
+    }
+
+    @Test
+    void fastLoginPremiumUuidConfigDefaultsToTrue(@TempDir Path tmp) throws Exception {
+        assertTrue(MigrationScanner.fastLoginPremiumUuid(tmp), "no FastLogin dir -> FastLogin default (true)");
+        Path fl = Files.createDirectories(tmp.resolve("FastLogin"));
+        Files.writeString(fl.resolve("config.yml"), "autoLogin: true\n", StandardCharsets.UTF_8);
+        assertTrue(MigrationScanner.fastLoginPremiumUuid(tmp), "missing key -> true");
+        Files.writeString(fl.resolve("config.yml"), "premiumUuid: false\n", StandardCharsets.UTF_8);
+        assertFalse(MigrationScanner.fastLoginPremiumUuid(tmp));
+    }
 }

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-11-17
+
+### Fixed
+- **Migration: MariaDB/MySQL TLS (`sslMode`)** — `/jl import` and the auto-scanner built a bare `jdbc:mariadb://host:port/db` URL, which failed on servers with self-signed certificates (`Self signed certificates. Either set sslMode=trust...`). The scanner now reads `sslMode` / `useSSL` from the legacy plugin config (`useSSL: false` -> `disable`, `true`/`REQUIRED` -> `trust`), falls back to JustLogin's `storage.mariadb.ssl-mode`, and manual `/jl import <source> mysql ... --ssl-mode=<trust|disable|verify-ca|verify-full>` can override it.
+- **Migration: FastLogin `premiumUuid`** — the FastLogin import always rewrote `game_uuid` of premium accounts from the offline UUID to the Mojang UUID, which breaks OP, whitelist, `world/playerdata/` and permissions on servers that ran FastLogin with `premiumUuid: false`. The scanner now reads `premiumUuid` from `plugins/FastLogin/config.yml` (missing key = `true`, FastLogin's own default = rewrite). With `premiumUuid: false` only `premium = 1` and `premium_uuid` are set and `game_uuid` stays untouched; new FastLogin-only accounts get the offline UUID.
+
+### Added
+- `--keep-offline-uuid` (alias `--preserve-game-uuid`) and `--rewrite-uuid` flags for `/jl import fastlogin` to override the config detection.
+- `--dry-run`, the start message, the final summary and the import report now state clearly whether FastLogin keeps the offline `game_uuid` or rewrites it to the Mojang UUID.
+- New message keys `admin.import-bad-flag`, `admin.import-fastlogin-uuid-kept`, `admin.import-fastlogin-uuid-rewritten` (`en`, `cs`, `sk`).
+
 ## [1.0.1] - 2026-11-15
 
 ### Changed

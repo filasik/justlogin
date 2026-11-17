@@ -132,6 +132,9 @@ admin:
   migration-conflict-warning: "<red><bold>VAROVÁNÍ:</bold> Starší auth plugin(y) <white>{plugins}</white> stále běží! Smaž jejich .jar soubory z <white>plugins/</white> a ponech pouze jejich datové složky pro migraci.</red>"
   import-auto-done: "<green>Automatická migrace dokončena: importováno=<white>{imported}</white>, aktualizováno=<white>{updated}</white>, existující=<white>{existing}</white>, neplatné=<white>{invalid}</white>.</green>"
   import-report-saved: "<yellow>Přehled přeskočených záznamů byl uložen do <white>{file}</white>.</yellow>"
+  import-bad-flag: "<red>Neznámá nebo neplatná volba importu <white>{flag}</white>. Povoleno: <white>--dry-run</white>, <white>--ssl-mode=trust|disable|verify-ca|verify-full</white>, <white>--keep-offline-uuid</white>, <white>--rewrite-uuid</white>.</red>"
+  import-fastlogin-uuid-kept: "<green>FastLogin: <white>game_uuid</white> zůstal beze změny (offline UUID zachována); nastaven jen příznak premium a premium_uuid.</green>"
+  import-fastlogin-uuid-rewritten: "<yellow>FastLogin: premium účtům s offline UUID se <white>game_uuid</white> přepíše na Mojang UUID. Pokud server běžel s premiumUuid: false, použij <white>--keep-offline-uuid</white> (OP, whitelist a playerdata závisí na UUID).</yellow>"
 
 captcha:
   usage: "<yellow>Použití: <white>/captcha <kód></white></yellow>"
@@ -409,7 +412,7 @@ help:
       syntax: "/jl import [auto|authme|fastlogin|librelogin|loginsecurity|nlogin|openlogin|limboauth|authy]"
       desc: "Prohledá plugins/ a zmigruje účty ze starších auth pluginů."
       example: "/jl import auto"
-      note: "Upřednostni /jl import auto před ručním zadáváním MySQL hesla v konzoli."
+      note: "Upřednostni /jl import auto před ručním zadáváním MySQL hesla v konzoli. Volby: --dry-run, --ssl-mode=<trust|disable|verify-ca|verify-full>, --keep-offline-uuid (FastLogin: zachová offline game_uuid)."
     jl_editor:
       syntax: "/jl editor [page]"
       desc: "Otevře end-to-end šifrovaný webový editor účtů (justlogin.net)."

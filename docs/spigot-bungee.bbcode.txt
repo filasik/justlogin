@@ -1,0 +1,78 @@
+[CENTER][IMG]https://raw.githubusercontent.com/filasik/justLogin/main/docs/assets/banner.png[/IMG]
+
+[B][SIZE=6][COLOR=#38bdf8]Just[/COLOR][COLOR=#2dd4bf]Login[/COLOR] [COLOR=#9ca3af]Bungee[/COLOR][/SIZE][/B]
+[SIZE=4]Proxy companion for JustLogin on BungeeCord / Waterfall[/SIZE]
+[SIZE=2][COLOR=#9ca3af]justlogin.net · Documentation on the GitHub wiki[/COLOR][/SIZE][/CENTER]
+
+[B][COLOR=#ef4444]This is the proxy half of JustLogin. It does nothing on its own: the main JustLogin plugin (Paper / Folia) must be installed on every backend server.[/COLOR][/B]
+
+[B]JustLogin Bungee[/B] runs on your BungeeCord or Waterfall proxy and connects it to JustLogin on your Paper backends. It validates usernames at the proxy edge, handles Mojang online-mode negotiation for [B]/premium[/B] accounts, keeps each account's permanent [B]game_uuid[/B], and forwards an [B]HMAC-SHA256 signed[/B] [I]justlogin:auth[/I] message (timestamp + single-use nonce) to your backends. Everything fails closed: a missing or placeholder shared secret, or a backend that is not ready, means players are refused instead of let through.
+
+[B]Highlights:[/B]
+[LIST]
+[*][B]Signed forwarding[/B] — HMAC-SHA256 with nonce and timestamp checks, compared in constant time.
+[*][B]Permanent UUIDs[/B] — switching between password login and Mojang login, or renaming a Mojang account, never changes the server UUID, so inventories, permissions and claims stay attached.
+[*][B]Auth / lobby servers[/B] — optional [I]proxy.auth-servers[/I] keeps unauthenticated players on designated servers; they cannot switch away until the backend confirms login.
+[*][B]Safe defaults[/B] — Mojang username auto-detect is off by default; username pattern validated before any lookup.
+[*][B]Bedrock friendly[/B] — optional Floodgate fallback so Bedrock players can use the password flow.
+[*][B]Shared database[/B] — SQLite for a single backend, MariaDB for networks (same settings on the proxy and on every Paper backend).
+[*][B]English, Czech and Slovak[/B] proxy messages.
+[/LIST]
+
+[B]Requirements:[/B]
+[LIST]
+[*]BungeeCord or Waterfall, Java 21+
+[*]JustLogin (Paper / Folia plugin, same version) on [B]every[/B] backend — download: [URL='https://www.spigotmc.org/resources/']JustLogin on SpigotMC[/URL] or [URL='https://github.com/filasik/justLogin/releases']GitHub Releases[/URL]
+[*]MariaDB shared by the proxy and all backends (recommended for any network)
+[*]Backends firewalled so they accept connections only from the proxy, and BungeeGuard installed (BungeeCord legacy forwarding can otherwise be spoofed)
+[/LIST]
+
+[B]Setup in 5 steps:[/B]
+[LIST=1]
+[*]Put [I]JustLogin-Bungee-<version>.jar[/I] into the proxy's [I]plugins/[/I] folder and JustLogin into every backend's [I]plugins/[/I] folder, then start everything once.
+[*]Generate a random secret of at least 16 characters and set it as [I]proxy.shared-secret[/I] in the proxy's JustLogin config.yml [B]and[/B] on every Paper backend (the placeholder value is rejected).
+[*]On each backend set [I]proxy.enabled: true[/I] and [I]proxy.mode: bungee[/I] in JustLogin's config.yml and [I]settings.bungeecord: true[/I] in spigot.yml.
+[*]Use the same [I]storage[/I] section (MariaDB) on the proxy and on all backends.
+[*]Restart. JustLogin on the backends verifies the forwarding setup at startup and refuses logins if anything is wrong.
+[/LIST]
+
+[SPOILER="Proxy config.yml"]
+[CODE]
+config-version: 1
+locale: en                      # en | cs | sk
+metrics: true                   # anonymous bStats, set false to disable
+
+username:
+  regex: "^[a-zA-Z0-9_]{3,16}$"
+
+proxy:
+  shared-secret: "CHANGE-ME-TO-A-LONG-RANDOM-SECRET"   # MUST match the Paper backends, 16+ characters
+  auto-detect-mojang: false     # opt-in lookup of unseen usernames at Mojang
+  mojang-cache-seconds: 300
+  floodgate-fallback: true
+  auth-servers: []              # e.g. [lobby] to hold unauthenticated players there
+
+storage:
+  type: sqlite                  # use mariadb for multiple backends
+  mariadb:
+    host: "localhost"
+    port: 3306
+    database: "justlogin"
+    user: "root"
+    password: ""
+[/CODE]
+[/SPOILER]
+
+[SPOILER="External connections & privacy"]
+The proxy module only contacts these services. Passwords never leave your servers.
+[LIST]
+[*]Mojang session server — verifies /premium sessions (and optional username lookups when proxy.auto-detect-mojang is enabled)
+[*]bStats — anonymous usage statistics (metrics: false to disable)
+[*]Your own MariaDB database
+[/LIST]
+[/SPOILER]
+
+[B]Everything else[/B] — native login dialogs before the world loads, Argon2id hashing, 2FA, Mojang /premium auto-login, skins, importers for AuthMe and others, the encrypted Web Editor — is part of the main JustLogin plugin. See its resource page and the documentation.
+
+[CENTER][SIZE=3]Website: [URL='https://justlogin.net']justlogin.net[/URL] · Documentation: [URL='https://github.com/filasik/justLogin/wiki']Wiki[/URL] · Source & Support: [URL='https://github.com/filasik/justLogin']GitHub[/URL] · Security: security@justlogin.net[/SIZE][/CENTER]
+[CENTER][SIZE=2][COLOR=#9ca3af]JustLogin is free and MIT licensed. Voluntary donations (no in-game perks): [URL='https://www.paypal.com/donate/?hosted_button_id=94D2D46EHKU5S']Donate via PayPal[/URL][/COLOR][/SIZE][/CENTER]

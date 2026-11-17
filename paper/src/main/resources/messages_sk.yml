@@ -132,6 +132,9 @@ admin:
   migration-conflict-warning: "<red><bold>VAROVANIE:</bold> Staršie auth pluginy <white>{plugins}</white> stále bežia! Zmaž ich .jar súbory z <white>plugins/</white> a ponechaj iba ich dátové priečinky pre migráciu.</red>"
   import-auto-done: "<green>Automatická migrácia dokončená: importované=<white>{imported}</white>, aktualizované=<white>{updated}</white>, existujúce=<white>{existing}</white>, neplatné=<white>{invalid}</white>.</green>"
   import-report-saved: "<yellow>Prehľad preskočených záznamov bol uložený do <white>{file}</white>.</yellow>"
+  import-bad-flag: "<red>Neznáma alebo neplatná voľba importu <white>{flag}</white>. Povolené: <white>--dry-run</white>, <white>--ssl-mode=trust|disable|verify-ca|verify-full</white>, <white>--keep-offline-uuid</white>, <white>--rewrite-uuid</white>.</red>"
+  import-fastlogin-uuid-kept: "<green>FastLogin: <white>game_uuid</white> zostal bez zmeny (offline UUID zachované); nastavený len príznak premium a premium_uuid.</green>"
+  import-fastlogin-uuid-rewritten: "<yellow>FastLogin: premium účtom s offline UUID sa <white>game_uuid</white> prepíše na Mojang UUID. Ak server bežal s premiumUuid: false, použi <white>--keep-offline-uuid</white> (OP, whitelist a playerdata závisia od UUID).</yellow>"
 
 captcha:
   usage: "<yellow>Použitie: <white>/captcha <kód></white></yellow>"
@@ -409,7 +412,7 @@ help:
       syntax: "/jl import [auto|authme|fastlogin|librelogin|loginsecurity|nlogin|openlogin|limboauth|authy]"
       desc: "Prehľadá plugins/ a zmigruje účty zo starších auth pluginov."
       example: "/jl import auto"
-      note: "Uprednostni /jl import auto pred ručným zadávaním MySQL hesla v konzole."
+      note: "Uprednostni /jl import auto pred ručným zadávaním MySQL hesla v konzole. Voľby: --dry-run, --ssl-mode=<trust|disable|verify-ca|verify-full>, --keep-offline-uuid (FastLogin: zachová offline game_uuid)."
     jl_editor:
       syntax: "/jl editor [page]"
       desc: "Otvorí end-to-end šifrovaný webový editor účtov (justlogin.net)."

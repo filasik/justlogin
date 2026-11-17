@@ -138,12 +138,10 @@ public final class AdminCommands {
                 .then(Commands.literal("import")
                         .requires(s -> hasAdminSub(s.getSender(), "import"))
                         .executes(c -> scanAndShowMigrations(c.getSource().getSender()))
-                        .then(Commands.literal("--dry-run")
-                                .executes(c -> runAutoImportAll(c.getSource().getSender(), true)))
+                        .then(flagsArg(c -> runAutoImportAll(c.getSource().getSender(), parseFlags(c))))
                         .then(Commands.literal("auto")
-                                .executes(c -> runAutoImportAll(c.getSource().getSender(), false))
-                                .then(Commands.literal("--dry-run")
-                                        .executes(c -> runAutoImportAll(c.getSource().getSender(), true))))
+                                .executes(c -> runAutoImportAll(c.getSource().getSender(), ImportFlags.NONE))
+                                .then(flagsArg(c -> runAutoImportAll(c.getSource().getSender(), parseFlags(c)))))
                         .then(buildImportNode("authme", SourceType.AUTHME, "authme", "plugins/AuthMe/authme.db"))
                         .then(buildImportNode("fastlogin", SourceType.FASTLOGIN, "premium", "plugins/FastLogin/FastLogin.db"))
                         .then(buildImportNode("librelogin", SourceType.LIBRELOGIN, "librepremium_data", "plugins/LibreLogin/user-data.db"))
@@ -256,13 +254,11 @@ public final class AdminCommands {
     private com.mojang.brigadier.builder.LiteralArgumentBuilder<CommandSourceStack> buildImportNode(
             String name, SourceType type, String defaultTable, String defaultPath) {
         return Commands.literal(name)
-                .executes(c -> runAutoImportSingle(c.getSource().getSender(), type, false))
+                .executes(c -> runAutoImportSingle(c.getSource().getSender(), type, ImportFlags.NONE))
                 .then(Commands.literal("auto")
-                        .executes(c -> runAutoImportSingle(c.getSource().getSender(), type, false))
-                        .then(Commands.literal("--dry-run")
-                                .executes(c -> runAutoImportSingle(c.getSource().getSender(), type, true))))
-                .then(Commands.literal("--dry-run")
-                        .executes(c -> runAutoImportSingle(c.getSource().getSender(), type, true)))
+                        .executes(c -> runAutoImportSingle(c.getSource().getSender(), type, ImportFlags.NONE))
+                        .then(flagsArg(c -> runAutoImportSingle(c.getSource().getSender(), type, parseFlags(c)))))
+                .then(flagsArg(c -> runAutoImportSingle(c.getSource().getSender(), type, parseFlags(c))))
                 .then(Commands.literal("sqlite")
                         .executes(c -> helpDetail(c.getSource().getSender(), "jl_import"))
                         .then(Commands.argument("path", StringArgumentType.greedyString())
@@ -307,21 +303,101 @@ public final class AdminCommands {
                                                                     if (b.getRemaining().isEmpty()) b.suggest("<password>");
                                                                     return b.buildFuture();
                                                                 })
-                                                                .executes(c -> runMysqlImport(c, type, defaultTable, false))
-                                                                .then(Commands.literal("--dry-run")
-                                                                        .executes(c -> runMysqlImport(c, type, defaultTable, true)))
-                                                                .then(Commands.argument("table", StringArgumentType.word())
+                                                                .executes(c -> runMysqlImport(c, type, defaultTable, ImportFlags.NONE))
+                                                                .then(Commands.argument("options", StringArgumentType.greedyString())
                                                                         .suggests((c, b) -> {
-                                                                            if (defaultTable.startsWith(b.getRemainingLowerCase())) {
-                                                                                b.suggest(defaultTable);
+                                                                            String rem = b.getRemainingLowerCase();
+                                                                            int sp = rem.lastIndexOf(' ');
+                                                                            String last = rem.substring(sp + 1);
+                                                                            for (String o : List.of("--dry-run", "--ssl-mode=trust",
+                                                                                    "--ssl-mode=disable", "--ssl-mode=verify-ca",
+                                                                                    "--ssl-mode=verify-full",
+                                                                                    "--keep-offline-uuid", "--rewrite-uuid")) {
+                                                                                if (o.startsWith(last)) {
+                                                                                    b.createOffset(b.getStart() + sp + 1).suggest(o);
+                                                                                }
                                                                             }
                                                                             return b.buildFuture();
                                                                         })
-                                                                        .executes(c -> runMysqlImport(c, type,
-                                                                                StringArgumentType.getString(c, "table"), false))
-                                                                        .then(Commands.literal("--dry-run")
-                                                                                .executes(c -> runMysqlImport(c, type,
-                                                                                        StringArgumentType.getString(c, "table"), true))))))))));
+                                                                        .executes(c -> {
+                                                                            // [table] [--dry-run] [--ssl-mode=<mode>] [--keep-offline-uuid]
+                                                                            ImportFlags f = ImportFlags.parse(
+                                                                                    StringArgumentType.getString(c, "options"));
+                                                                            String table = f.table() != null ? f.table() : defaultTable;
+                                                                            return runMysqlImport(c, type, table, f);
+                                                                        }))))))));
+    }
+
+    /** Optional trailing flags: {@code --dry-run}, {@code --ssl-mode=<mode>}, {@code --keep-offline-uuid}. */
+    private com.mojang.brigadier.builder.RequiredArgumentBuilder<CommandSourceStack, String> flagsArg(
+            com.mojang.brigadier.Command<CommandSourceStack> exec) {
+        return Commands.argument("flags", StringArgumentType.greedyString())
+                .suggests((c, b) -> {
+                    String rem = b.getRemainingLowerCase();
+                    int sp = rem.lastIndexOf(' ');
+                    String last = rem.substring(sp + 1);
+                    for (String o : List.of("--dry-run", "--ssl-mode=trust", "--ssl-mode=disable",
+                            "--keep-offline-uuid", "--rewrite-uuid")) {
+                        if (o.startsWith(last)) b.createOffset(b.getStart() + sp + 1).suggest(o);
+                    }
+                    return b.buildFuture();
+                })
+                .executes(exec);
+    }
+
+    private static ImportFlags parseFlags(CommandContext<CommandSourceStack> c) {
+        return ImportFlags.parse(StringArgumentType.getString(c, "flags"));
+    }
+
+    /**
+     * @param error unknown token / invalid value (shown to the sender), {@code null} when valid
+     * @param preserveGameUuid {@code TRUE} = {@code --keep-offline-uuid}, {@code FALSE} = {@code --rewrite-uuid},
+     *                         {@code null} = follow FastLogin's {@code premiumUuid} config
+     */
+    record ImportFlags(boolean dryRun, @Nullable String sslMode, @Nullable Boolean preserveGameUuid,
+                       @Nullable String table, @Nullable String error) {
+        static final ImportFlags NONE = new ImportFlags(false, null, null, null, null);
+
+        static ImportFlags parse(String raw) {
+            boolean dry = false;
+            String ssl = null;
+            Boolean keep = null;
+            String table = null;
+            String error = null;
+            for (String tok : raw.strip().split("\\s+")) {
+                if (tok.isEmpty()) continue;
+                String lower = tok.toLowerCase(Locale.ROOT);
+                if (lower.equals("--dry-run")) {
+                    dry = true;
+                } else if (lower.equals("--keep-offline-uuid") || lower.equals("--preserve-game-uuid")) {
+                    keep = Boolean.TRUE;
+                } else if (lower.equals("--rewrite-uuid")) {
+                    keep = Boolean.FALSE;
+                } else if (lower.startsWith("--ssl-mode=")) {
+                    String v = tok.substring("--ssl-mode=".length());
+                    ssl = MigrationScanner.normalizeSslMode(v);
+                    if (ssl == null) error = tok;
+                } else if (lower.startsWith("--")) {
+                    error = tok;
+                } else if (table == null && tok.matches("^[a-zA-Z0-9_]{1,64}$")) {
+                    table = tok;
+                } else {
+                    error = tok;
+                }
+            }
+            return new ImportFlags(dry, ssl, keep, table, error);
+        }
+    }
+
+    private boolean rejectFlags(Context ctx, CommandSender sender, ImportFlags f) {
+        if (f.error() == null) return false;
+        ctx.messages().send(sender, "admin.import-bad-flag", Map.of("flag", f.error()));
+        return true;
+    }
+
+    private MigrationScanner.ScanOptions scanOptions(Context ctx, ImportFlags f) {
+        String fallback = ctx.settings().dbConfig().sslMode();
+        return new MigrationScanner.ScanOptions(f.sslMode(), fallback, f.preserveGameUuid());
     }
 
     private java.util.concurrent.CompletableFuture<com.mojang.brigadier.suggestion.Suggestions> suggestHelpTopics(
@@ -708,13 +784,16 @@ public final class AdminCommands {
         return Command.SINGLE_SUCCESS;
     }
 
-    private int runAutoImportAll(CommandSender sender, boolean dryRun) {
+    private int runAutoImportAll(CommandSender sender, ImportFlags flags) {
         Context ctx = readyContext(sender);
         if (ctx == null) return Command.SINGLE_SUCCESS;
+        if (rejectFlags(ctx, sender, flags)) return Command.SINGLE_SUCCESS;
+        boolean dryRun = flags.dryRun();
+        MigrationScanner.ScanOptions opts = scanOptions(ctx, flags);
         Path dataDir = plugin.getDataFolder().toPath().toAbsolutePath().normalize();
         Path pluginsDir = dataDir.getParent();
         ctx.scheduler().runAsync(() -> {
-            List<DetectedSource> detected = MigrationScanner.scan(pluginsDir);
+            List<DetectedSource> detected = MigrationScanner.scan(pluginsDir, opts);
             ctx.setDetectedMigrations(detected);
             if (detected.isEmpty()) {
                 runOnSenderThread(ctx, sender, () -> ctx.messages().send(sender, "admin.migration-none-found"));
@@ -730,13 +809,16 @@ public final class AdminCommands {
         return Command.SINGLE_SUCCESS;
     }
 
-    private int runAutoImportSingle(CommandSender sender, SourceType type, boolean dryRun) {
+    private int runAutoImportSingle(CommandSender sender, SourceType type, ImportFlags flags) {
         Context ctx = readyContext(sender);
         if (ctx == null) return Command.SINGLE_SUCCESS;
+        if (rejectFlags(ctx, sender, flags)) return Command.SINGLE_SUCCESS;
+        boolean dryRun = flags.dryRun();
+        MigrationScanner.ScanOptions opts = scanOptions(ctx, flags);
         Path dataDir = plugin.getDataFolder().toPath().toAbsolutePath().normalize();
         Path pluginsDir = dataDir.getParent();
         ctx.scheduler().runAsync(() -> {
-            List<DetectedSource> detected = MigrationScanner.scan(pluginsDir);
+            List<DetectedSource> detected = MigrationScanner.scan(pluginsDir, opts);
             DetectedSource match = detected.stream().filter(s -> s.type() == type).findFirst().orElse(null);
             if (match == null) {
                 runOnSenderThread(ctx, sender, () -> {
@@ -757,35 +839,62 @@ public final class AdminCommands {
     private int runSqliteImport(CommandSender sender, SourceType type, String rawPath, String defaultTable) {
         Context ctx = readyContext(sender);
         if (ctx == null) return Command.SINGLE_SUCCESS;
-        boolean dryRun = rawPath.endsWith(" --dry-run");
-        String pathStr = dryRun ? rawPath.substring(0, rawPath.length() - " --dry-run".length()).strip() : rawPath.strip();
+        // Trailing "--flag" tokens belong to the options, everything before them is the (possibly spaced) path.
+        String[] toks = rawPath.strip().split("\\s+");
+        int end = toks.length;
+        while (end > 1 && toks[end - 1].startsWith("--")) end--;
+        String pathStr = String.join(" ", java.util.Arrays.copyOfRange(toks, 0, end));
+        ImportFlags flags = ImportFlags.parse(String.join(" ", java.util.Arrays.copyOfRange(toks, end, toks.length)));
+        if (rejectFlags(ctx, sender, flags)) return Command.SINGLE_SUCCESS;
         Path dataDir = plugin.getDataFolder().toPath().toAbsolutePath().normalize();
-        DetectedSource src = DetectedSource.sqlite(type, Path.of(pathStr), defaultTable);
-        ctx.messages().send(sender, "admin.import-started",
-                Map.of("source", type.displayName(), "target", pathStr + (dryRun ? " (--dry-run)" : "")));
-        MigrationScanner.importSingle(src, ctx.accounts(), ctx.audit(), ctx.secrets(),
-                sender.getName(), dryRun, dataDir, System.currentTimeMillis())
-                .whenComplete((summary, ex) -> handleAutoSummary(ctx, sender, summary, ex, false));
+        DetectedSource src = withFastLoginUuidMode(
+                DetectedSource.sqlite(type, Path.of(pathStr), defaultTable), flags);
+        startAndRun(ctx, sender, src, flags.dryRun(), dataDir, pathStr);
         return Command.SINGLE_SUCCESS;
     }
 
-    private int runMysqlImport(CommandContext<CommandSourceStack> c, SourceType type, String table, boolean dryRun) {
+    private int runMysqlImport(CommandContext<CommandSourceStack> c, SourceType type, String table, ImportFlags flags) {
         CommandSender sender = c.getSource().getSender();
         Context ctx = readyContext(sender);
         if (ctx == null) return Command.SINGLE_SUCCESS;
+        if (rejectFlags(ctx, sender, flags)) return Command.SINGLE_SUCCESS;
         String host = StringArgumentType.getString(c, "host");
         int port = IntegerArgumentType.getInteger(c, "port");
         String db = StringArgumentType.getString(c, "database");
         String user = StringArgumentType.getString(c, "user");
         String pass = StringArgumentType.getString(c, "password");
         Path dataDir = plugin.getDataFolder().toPath().toAbsolutePath().normalize();
-        DetectedSource src = DetectedSource.mysql(type, host, port, db, user, pass, table);
+        // Explicit --ssl-mode wins, otherwise JustLogin's storage.mariadb.ssl-mode, otherwise the driver default.
+        String ssl = flags.sslMode() != null ? flags.sslMode() : ctx.settings().dbConfig().sslMode();
+        DetectedSource src = withFastLoginUuidMode(
+                DetectedSource.mysql(type, host, port, db, user, pass, table, ssl), flags);
+        startAndRun(ctx, sender, src, flags.dryRun(), dataDir, host + ":" + port + "/" + db);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    /** Manual FastLogin imports: flag > plugins/FastLogin/config.yml {@code premiumUuid} > rewrite (FastLogin default). */
+    private DetectedSource withFastLoginUuidMode(DetectedSource src, ImportFlags flags) {
+        if (src.type() != SourceType.FASTLOGIN) return src;
+        boolean preserve;
+        if (flags.preserveGameUuid() != null) {
+            preserve = flags.preserveGameUuid();
+        } else {
+            Path pluginsDir = plugin.getDataFolder().toPath().toAbsolutePath().normalize().getParent();
+            preserve = !MigrationScanner.fastLoginPremiumUuid(pluginsDir);
+        }
+        return src.withPreserveGameUuid(preserve);
+    }
+
+    private void startAndRun(Context ctx, CommandSender sender, DetectedSource src, boolean dryRun,
+                             Path dataDir, String target) {
+        String shown = src.type() == SourceType.FASTLOGIN
+                ? target + " [game_uuid=" + (src.preserveGameUuid() ? "keep-offline" : "rewrite-to-mojang") + "]"
+                : target;
         ctx.messages().send(sender, "admin.import-started",
-                Map.of("source", type.displayName(), "target", host + ":" + port + "/" + db + (dryRun ? " (--dry-run)" : "")));
+                Map.of("source", src.type().displayName(), "target", shown + (dryRun ? " (--dry-run)" : "")));
         MigrationScanner.importSingle(src, ctx.accounts(), ctx.audit(), ctx.secrets(),
                 sender.getName(), dryRun, dataDir, System.currentTimeMillis())
                 .whenComplete((summary, ex) -> handleAutoSummary(ctx, sender, summary, ex, false));
-        return Command.SINGLE_SUCCESS;
     }
 
     private void handleAutoSummary(
@@ -809,6 +918,12 @@ public final class AdminCommands {
                     "updated", String.valueOf(summary.totalUpdated()),
                     "existing", String.valueOf(summary.totalSkippedExisting()),
                     "invalid", String.valueOf(summary.totalSkippedInvalid())));
+            for (MigrationScanner.SourceResult r : summary.results()) {
+                if (r.source().type() == SourceType.FASTLOGIN) {
+                    ctx.messages().send(sender, r.source().preserveGameUuid()
+                            ? "admin.import-fastlogin-uuid-kept" : "admin.import-fastlogin-uuid-rewritten");
+                }
+            }
             if (summary.reportFile() != null) {
                 ctx.messages().send(sender, "admin.import-report-saved",
                         Map.of("file", "plugins/JustLogin/" + summary.reportFile().getFileName()));

@@ -6,8 +6,17 @@
 
 [B]JustLogin[/B] authenticates players cleanly using Minecraft 1.21.7+ [B]Configuration-phase Paper Dialogs[/B] before they ever spawn in a world — alongside Argon2id hashing, standalone & proxy [B]/premium[/B] auto-login, RFC 6238 TOTP 2FA, immutable server UUIDs, AuthMe/FastLogin importers, and an AES-256-GCM encrypted Web Editor.
 
+[B][COLOR=#ef4444]Requires Paper (or Folia). It does NOT run on Spigot or CraftBukkit.[/COLOR][/B] It uses Paper's Dialog, Configuration-phase and Brigadier APIs.
+
 [CENTER][IMG]https://raw.githubusercontent.com/filasik/justLogin/main/docs/gallery/ingame-register-dialog.png[/IMG]
 [SIZE=2][I]In-game screenshot: Native Configuration-phase Paper Dialog modal shown before world spawn.[/I][/SIZE][/CENTER]
+
+[B]Requirements:[/B]
+[LIST]
+[*]Paper 1.21.7 – 26.x or Folia, Java 21+
+[*]Proxy (optional): Velocity 3 or BungeeCord / Waterfall with the matching JustLogin proxy jar (download on GitHub) and a shared MariaDB
+[*]Optional: Floodgate (Bedrock forms), ViaVersion (older clients)
+[/LIST]
 
 [B]Highlights:[/B]
 [LIST]
@@ -77,5 +86,16 @@ storage:
 [/CODE]
 [/SPOILER]
 
-[CENTER][SIZE=3]Website: [URL='https://justlogin.net']justlogin.net[/URL] · Source & Support: [URL='https://github.com/filasik/justLogin']GitHub[/URL][/SIZE][/CENTER]
+[SPOILER="External connections & privacy"]
+JustLogin only contacts these services. Passwords never leave your server.
+[LIST]
+[*]Mojang session server — verifies /premium sessions and fetches signed skin textures (disable with premium.standalone-enabled: false and skins.enabled: false)
+[*]GitHub Releases API — update check at startup and every 12 hours (update-check: false)
+[*]bStats — anonymous usage statistics, plugin ID 35316 (metrics: false)
+[*]Web Editor relay (justlogin.net / Bytebin) — only an AES-256-GCM encrypted snapshot, the key stays in the URL #fragment (or use editor.local-http.enabled: true)
+[*]Your own SMTP server — recovery emails, only if you configure email
+[/LIST]
+[/SPOILER]
+
+[CENTER][SIZE=3]Website: [URL='https://justlogin.net']justlogin.net[/URL] · Documentation: [URL='https://github.com/filasik/justLogin/wiki']Wiki[/URL] · Source & Support: [URL='https://github.com/filasik/justLogin']GitHub[/URL] · Security: security@justlogin.net[/SIZE][/CENTER]
 [CENTER][SIZE=2][COLOR=#9ca3af]JustLogin is free and every security feature stays free. Voluntary donations (no in-game perks): [URL='https://www.paypal.com/donate/?hosted_button_id=94D2D46EHKU5S']Donate via PayPal[/URL][/COLOR][/SIZE][/CENTER]

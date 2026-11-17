@@ -132,6 +132,9 @@ admin:
   migration-conflict-warning: "<red><bold>WARNING:</bold> Legacy auth plugin(s) <white>{plugins}</white> are still active! Delete their .jar files from <white>plugins/</white> and keep only their data folders for migration.</red>"
   import-auto-done: "<green>Auto-migration finished: imported=<white>{imported}</white>, updated=<white>{updated}</white>, skippedExisting=<white>{existing}</white>, skippedInvalid=<white>{invalid}</white>.</green>"
   import-report-saved: "<yellow>Skipped migration entries report saved to <white>{file}</white>.</yellow>"
+  import-bad-flag: "<red>Unknown or invalid import option <white>{flag}</white>. Allowed: <white>--dry-run</white>, <white>--ssl-mode=trust|disable|verify-ca|verify-full</white>, <white>--keep-offline-uuid</white>, <white>--rewrite-uuid</white>.</red>"
+  import-fastlogin-uuid-kept: "<green>FastLogin: <white>game_uuid</white> kept as-is (offline UUIDs preserved); only premium flag and premium_uuid were set.</green>"
+  import-fastlogin-uuid-rewritten: "<yellow>FastLogin: premium accounts on an offline UUID get their <white>game_uuid</white> rewritten to the Mojang UUID. Use <white>--keep-offline-uuid</white> if your server ran with premiumUuid: false (OP, whitelist and playerdata depend on the UUID).</yellow>"
 
 captcha:
   usage: "<yellow>Usage: <white>/captcha <code></white></yellow>"
@@ -409,7 +412,7 @@ help:
       syntax: "/jl import [auto|authme|fastlogin|librelogin|loginsecurity|nlogin|openlogin|limboauth|authy]"
       desc: "Scan plugins/ and migrate accounts from legacy auth plugins."
       example: "/jl import auto"
-      note: "Prefer /jl import auto over manual MySQL arguments so DB passwords stay out of console history."
+      note: "Prefer /jl import auto over manual MySQL arguments so DB passwords stay out of console history. Options: --dry-run, --ssl-mode=<trust|disable|verify-ca|verify-full>, --keep-offline-uuid (FastLogin: keep offline game_uuid)."
     jl_editor:
       syntax: "/jl editor [page]"
       desc: "Open an end-to-end encrypted web editor session (justlogin.net)."
