@@ -231,6 +231,33 @@ class EditorServiceTest {
         }
     }
 
+    @Test
+    void exportPagesByLastLoginWithDeterministicTies() throws Exception {
+        try (LocalHttpEditorServer srv = LocalHttpEditorServer.start("127.0.0.1", 0);
+                Database db = new Database(DbConfig.memory())) {
+            Migrations.migrate(db);
+            AccountStore accounts = new AccountStore(db);
+            for (String name : List.of("active", "tiefirst", "tielast", "never")) {
+                accounts.importIfAbsent(name, name, UUID.randomUUID(), null, null, HashAlgorithm.NONE,
+                        false, 100L, name.equals("never") ? 0L : 200L, null, 100L).join();
+            }
+            var active = accounts.findByNameLower("active").join().orElseThrow();
+            accounts.updateLoginSuccess(active.id(), "active", null, 300L).join();
+            BytebinClient relay = new BytebinClient(srv.baseUrl());
+            EditorService editor = new EditorService(accounts, new AuditStore(db), System::currentTimeMillis);
+            List<List<String>> expected = List.of(List.of("active", "tielast"), List.of("tiefirst", "never"));
+            for (int page = 1; page <= 2; page++) {
+                var exported = editor.createSession(page, 2, "https://justlogin.net", relay,
+                        EditorService.DEFAULT_TTL_MILLIS).join();
+                SecretKey key = EditorCrypto.decodeKey(exported.editorUrl().split("#", 2)[1]);
+                var envelope = GSON.fromJson(relay.download(exported.blobKey()).join(), EditorCrypto.EncryptedEnvelope.class);
+                var payload = GSON.fromJson(EditorCrypto.decrypt(key, envelope), EditorModels.EditorPayload.class);
+                assertEquals(expected.get(page - 1), payload.accounts().stream().map(EditorModels.EditorAccount::name).toList());
+                assertEquals(4L, payload.totalAccounts());
+            }
+        }
+    }
+
     private static String sendRawHttp(int port, String rawRequest) throws IOException {
         try (Socket sock = new Socket("127.0.0.1", port)) {
             sock.setSoTimeout(5000);

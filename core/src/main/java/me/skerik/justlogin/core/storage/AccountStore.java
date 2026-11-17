@@ -401,6 +401,22 @@ public final class AccountStore {
         });
     }
 
+    /** Most recently active accounts first; ID breaks ties for deterministic pagination. */
+    public CompletableFuture<List<Account>> listAccountsByLastLogin(int offset, int limit) {
+        return db.supply(c -> {
+            List<Account> list = new ArrayList<>();
+            try (PreparedStatement ps = c.prepareStatement(
+                    "SELECT " + SELECT_COLS + " FROM " + TABLE + " ORDER BY last_login_at DESC, id DESC LIMIT ? OFFSET ?")) {
+                ps.setInt(1, Math.max(1, limit));
+                ps.setInt(2, Math.max(0, offset));
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) list.add(map(rs));
+                }
+            }
+            return list;
+        });
+    }
+
     public CompletableFuture<Long> countAccounts() {
         return db.supply(c -> {
             try (Statement st = c.createStatement(); ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM " + TABLE)) {

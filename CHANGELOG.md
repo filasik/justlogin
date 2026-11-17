@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.4] - 2026-11-17
+
+### Changed
+- `/jl editor [page]` now exports accounts ordered by most recent login first rather than registration order. Accounts with no recorded login sort last; equal login timestamps are ordered by descending account ID for deterministic pagination.
+
 ## [1.0.3] - 2026-11-17
 
 ### Fixed

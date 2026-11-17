@@ -74,7 +74,7 @@ public final class EditorService {
         int offset = (safePage - 1) * safeSize;
 
         return accounts.countAccounts()
-                .thenCombine(accounts.listAccounts(offset, safeSize), (total, rows) -> {
+                .thenCombine(accounts.listAccountsByLastLogin(offset, safeSize), (total, rows) -> {
                     long now = clock.getAsLong();
                     long expiresAt = now + Math.max(60_000L, ttlMillis);
                     String sessionId = generateSessionId();

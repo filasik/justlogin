@@ -101,3 +101,5 @@ JustLogin only contacts these services. Passwords never leave your server.
 [CENTER][SIZE=2][COLOR=#9ca3af]JustLogin is free and every security feature stays free. Voluntary donations (no in-game perks): [URL='https://www.paypal.com/donate/?hosted_button_id=94D2D46EHKU5S']Donate via PayPal[/URL][/COLOR][/SIZE][/CENTER]
 
 [B]Web Editor relay:[/B] https://bytebin.justlogin.net is the default encrypted relay. Existing default configurations are migrated automatically; custom relay URLs are preserved.
+
+/jl editor [page] lists accounts by most recent login first.
