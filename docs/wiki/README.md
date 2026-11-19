@@ -1,9 +1,6 @@
 # Wiki source
 
-These files mirror the [GitHub Wiki](https://github.com/filasik/justLogin/wiki). To publish them:
+These files are the source of the [GitHub Wiki](https://github.com/filasik/justLogin/wiki).
+Edit them here: the `Sync wiki` workflow (`.github/workflows/wiki-sync.yml`) publishes them to the wiki whenever they change on `main` (or run it manually from the Actions tab). Pages edited directly in the wiki UI are overwritten on the next sync.
 
-```bash
-git clone https://github.com/filasik/justlogin.wiki.git
-cp docs/wiki/*.md justlogin.wiki/ && rm justlogin.wiki/README.md
-cd justlogin.wiki && git add -A && git commit -m "Sync wiki" && git push
-```
+This README is not copied to the wiki.
