@@ -3,7 +3,6 @@ plugins {
     id("com.gradleup.shadow") version "9.6.1" apply false
     id("xyz.jpenilla.run-paper") version "3.1.0" apply false
     id("com.modrinth.minotaur") version "2.+" apply false
-    id("io.papermc.hangar-publish-plugin") version "0.1.4"
 }
 
 // Changelog text of the current version only (the "## [<version>]" section of CHANGELOG.md)
@@ -52,40 +51,6 @@ subprojects {
         testLogging {
             events("failed")
             exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
-        }
-    }
-}
-
-// Hangar: ONE version with one jar per platform (Paper/Velocity/Waterfall).
-// Publish with: ./gradlew publishPluginPublicationToHangar  (env HANGAR_API_TOKEN, permission create_version)
-evaluationDependsOnChildren()
-
-fun jarOf(module: String) =
-    project(":$module").tasks.named<org.gradle.api.tasks.bundling.AbstractArchiveTask>("shadowJar").flatMap { it.archiveFile }
-
-fun versionsOf(key: String) =
-    providers.gradleProperty(key).map { v -> v.split(",").map(String::trim).filter(String::isNotEmpty) }
-
-hangarPublish {
-    publications.register("plugin") {
-        version.set(project.property("pluginVersion") as String)
-        id.set(project.property("hangarId") as String)
-        channel.set("Release") // must exist on Hangar
-        changelog.set(releaseNotes)
-        apiKey.set(providers.environmentVariable("HANGAR_API_TOKEN"))
-        platforms {
-            register(io.papermc.hangarpublishplugin.model.Platforms.PAPER) {
-                jar.set(jarOf("paper"))
-                platformVersions.set(versionsOf("hangarPaperVersions"))
-            }
-            register(io.papermc.hangarpublishplugin.model.Platforms.VELOCITY) {
-                jar.set(jarOf("velocity"))
-                platformVersions.set(versionsOf("hangarVelocityVersions"))
-            }
-            register(io.papermc.hangarpublishplugin.model.Platforms.WATERFALL) {
-                jar.set(jarOf("bungee"))
-                platformVersions.set(versionsOf("hangarWaterfallVersions"))
-            }
         }
     }
 }

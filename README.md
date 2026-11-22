@@ -299,7 +299,7 @@ Output JARs after build:
 ## Documentation & Links
 
 - **Website**: [justlogin.net](https://justlogin.net)
-- **Modrinth / Hangar description**: [`docs/modrinth.md`](docs/modrinth.md)
+- **Modrinth description**: [`docs/modrinth.md`](docs/modrinth.md)
 - **SpigotMC BBCode**: [`docs/spigot.bbcode.txt`](docs/spigot.bbcode.txt)
 - **Gallery**: [`docs/gallery/`](docs/gallery/README.md)
 - **Security policy**: [`SECURITY.md`](SECURITY.md) · **Contributing**: [`CONTRIBUTING.md`](CONTRIBUTING.md)
