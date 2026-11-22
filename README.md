@@ -19,6 +19,10 @@ Native **Configuration-phase Paper Dialogs**, **Argon2id** hashing, **standalone
 
 ---
 
+<p align="center"><a href="https://skerik.me/plugin"><img src="docs/assets/justfamily.png" width="128" alt="just plugins family"></a></p>
+
+> Part of the **[just plugins family](https://skerik.me/plugin)**: a collection of Paper plugins (JustLogin, JustAuction, JustPolls, JustLogs and AI Friend). Find them all at [skerik.me/plugin](https://skerik.me/plugin).
+
 ## Why JustLogin?
 
 Traditional authentication plugins drop unauthenticated players into a live world (or require a separate limbo server) and freeze movement on every tick while spamming chat. **JustLogin** rethinks authentication for modern Paper servers:
