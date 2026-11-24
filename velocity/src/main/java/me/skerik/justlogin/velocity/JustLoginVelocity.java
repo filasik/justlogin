@@ -360,7 +360,9 @@ public final class JustLoginVelocity {
     public void onServerConnected(ServerConnectedEvent event) {
         if (misconfigured || proxyAuth == null || signer == null) return;
         Player player = event.getPlayer();
-        byte[] signed = proxyAuth.signBackendMessageIfOnline(signer, player.getUsername(), player.getUniqueId());
+        byte[] signed = proxyAuth.signBackendMessageIfOnline(
+                signer, player.getUsername(), player.getUniqueId(),
+                event.getServer().getServerInfo().getName());
         if (signed != null) {
             authenticatedPlayers.add(player.getUniqueId());
             event.getServer().sendPluginMessage(CHANNEL, signed);

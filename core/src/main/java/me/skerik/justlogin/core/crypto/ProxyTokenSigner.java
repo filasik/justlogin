@@ -108,7 +108,7 @@ public final class ProxyTokenSigner {
             String targetServer = pin.available() > 0 ? pin.readUTF() : "";
 
             if (expectedTargetServer != null && !expectedTargetServer.isEmpty()
-                    && !targetServer.isEmpty() && !expectedTargetServer.equalsIgnoreCase(targetServer)) {
+                    && !expectedTargetServer.equalsIgnoreCase(targetServer)) {
                 return null;
             }
             if (Math.abs(nowMillis - issuedAt) > MAX_AGE_MILLIS) return null;

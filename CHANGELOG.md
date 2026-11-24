@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.6] - 2026-11-24
+
+### Security
+- **Atomic rate-limit slot reservation in TOTP & Email Recovery**: `AuthService.verifyTotp`, `AuthService.disableTotp`, `EmailRecoveryService.confirmEmail`, and `EmailRecoveryService.completeRecovery` now reserve an in-flight attempt slot via `LoginRateLimiter.tryAcquire(...)` before performing database/crypto work and release or record outcomes on every exit path, matching `login`, `changePassword`, and `unregister`.
+- **Strict `targetServer` binding on signed proxy tokens**: `ProxyTokenSigner.verify(raw, expectedTargetServer, now)` now rejects tokens with an empty `targetServer` when `expectedTargetServer` is specified, and Velocity (`JustLoginVelocity`) and BungeeCord (`JustLoginBungee`) include the destination backend server name when signing `AUTH_OK` / `PREMIUM_VERIFIED` messages.
+
 ## [1.0.5] - 2026-11-17
 
 ### Added

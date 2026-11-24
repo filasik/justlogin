@@ -361,17 +361,19 @@ public final class AuthService {
         boolean unknownIp = IpHmac.isUnknownIp(ip);
         String ipHash = hashIp(ip);
 
-        LoginRateLimiter.Decision rl = rateLimiter.check(nameLower, ipHash, s);
+        LoginRateLimiter.Decision rl = rateLimiter.tryAcquire(nameLower, ipHash, s);
         if (!rl.allowed()) {
             return CompletableFuture.completedFuture(new LoginResult(Status.RATE_LIMITED, null, rl.retryAfterSeconds()));
         }
 
         return accounts.findByNameLower(nameLower).thenCompose(found -> {
             if (found.isEmpty()) {
+                rateLimiter.releaseInFlight(nameLower, ipHash);
                 return CompletableFuture.completedFuture(new LoginResult(Status.NOT_REGISTERED, null, 0));
             }
             Account acc = found.get();
             if (!acc.hasTotp() || acc.totpSecretEncrypted() == null) {
+                rateLimiter.releaseInFlight(nameLower, ipHash);
                 return CompletableFuture.completedFuture(new LoginResult(Status.TOTP_NOT_ENABLED, acc, 0));
             }
 
@@ -379,6 +381,7 @@ public final class AuthService {
             try {
                 secret = AesGcmCrypto.decrypt(secrets.totpKey(), acc.totpSecretEncrypted());
             } catch (RuntimeException e) {
+                rateLimiter.releaseInFlight(nameLower, ipHash);
                 return CompletableFuture.completedFuture(new LoginResult(Status.TOTP_DECRYPT_ERROR, acc, 0));
             }
             long now = clock.getAsLong();
@@ -421,6 +424,10 @@ public final class AuthService {
                                     .thenApply(v2 -> new LoginResult(Status.SUCCESS, acc, 0));
                         });
                     });
+        }).exceptionally(ex -> {
+            rateLimiter.releaseInFlight(nameLower, ipHash);
+            if (ex instanceof RuntimeException re) throw re;
+            throw new RuntimeException(ex);
         });
     }
 
@@ -619,21 +626,26 @@ public final class AuthService {
         CoreSettings s = settingsSupplier.get();
         String nameLower = UsernameValidator.normalizeLower(username);
         String ipHash = hashIp(ip);
-        LoginRateLimiter.Decision rl = rateLimiter.check(nameLower, ipHash, s);
+        LoginRateLimiter.Decision rl = rateLimiter.tryAcquire(nameLower, ipHash, s);
         if (!rl.allowed()) {
             return CompletableFuture.completedFuture(SimpleResult.rateLimited(rl.retryAfterSeconds()));
         }
 
         return accounts.findByNameLower(nameLower).thenCompose(found -> {
-            if (found.isEmpty()) return CompletableFuture.completedFuture(SimpleResult.of(Status.NOT_REGISTERED));
+            if (found.isEmpty()) {
+                rateLimiter.releaseInFlight(nameLower, ipHash);
+                return CompletableFuture.completedFuture(SimpleResult.of(Status.NOT_REGISTERED));
+            }
             Account acc = found.get();
             if (!acc.hasTotp() || acc.totpSecretEncrypted() == null) {
+                rateLimiter.releaseInFlight(nameLower, ipHash);
                 return CompletableFuture.completedFuture(SimpleResult.of(Status.TOTP_NOT_ENABLED));
             }
             final String secret;
             try {
                 secret = AesGcmCrypto.decrypt(secrets.totpKey(), acc.totpSecretEncrypted());
             } catch (RuntimeException e) {
+                rateLimiter.releaseInFlight(nameLower, ipHash);
                 return CompletableFuture.completedFuture(SimpleResult.of(Status.TOTP_DECRYPT_ERROR));
             }
             long now = clock.getAsLong();
@@ -656,6 +668,10 @@ public final class AuthService {
                         .thenCompose(v -> audit.record(now, actor, "TOTP_DISABLE", nameLower, null))
                         .thenApply(v -> SimpleResult.ok());
             });
+        }).exceptionally(ex -> {
+            rateLimiter.releaseInFlight(nameLower, ipHash);
+            if (ex instanceof RuntimeException re) throw re;
+            throw new RuntimeException(ex);
         });
     }
 

@@ -330,6 +330,11 @@ public final class ProxyAuthService {
     }
 
     public byte @Nullable [] signBackendMessageIfOnline(ProxyTokenSigner signer, String username, UUID gameUuid) {
+        return signBackendMessageIfOnline(signer, username, gameUuid, "");
+    }
+
+    public byte @Nullable [] signBackendMessageIfOnline(
+            ProxyTokenSigner signer, String username, UUID gameUuid, @Nullable String targetServer) {
         String lower = UsernameValidator.normalizeLower(username);
         PendingToken tok = pendingTokens.get(lower);
         long now = clock.getAsLong();
@@ -337,7 +342,7 @@ public final class ProxyAuthService {
             pendingTokens.remove(lower, tok);
             return null;
         }
-        return signer.sign(tok.type(), tok.accountId(), lower, gameUuid, now);
+        return signer.sign(tok.type(), tok.accountId(), lower, gameUuid, targetServer == null ? "" : targetServer, now);
     }
 
     public void onDisconnect(String username) {

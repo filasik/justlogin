@@ -268,7 +268,9 @@ public final class JustLoginBungee extends Plugin implements Listener {
     public void onServerConnected(ServerConnectedEvent event) {
         if (misconfigured || proxyAuth == null || signer == null) return;
         ProxiedPlayer player = event.getPlayer();
-        byte[] signed = proxyAuth.signBackendMessageIfOnline(signer, player.getName(), player.getUniqueId());
+        byte[] signed = proxyAuth.signBackendMessageIfOnline(
+                signer, player.getName(), player.getUniqueId(),
+                event.getServer().getInfo().getName());
         if (signed != null) {
             authenticatedPlayers.add(player.getUniqueId());
             event.getServer().sendData(ProxyTokenSigner.CHANNEL, signed);

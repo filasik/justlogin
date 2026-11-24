@@ -244,12 +244,15 @@ public final class EmailRecoveryService {
         CoreSettings cs = coreSupplier.get();
         String nameLower = UsernameValidator.normalizeLower(username);
         String ipHash = IpHmac.hashIp(secrets.hmacKey(), ip);
-        LoginRateLimiter.Decision rl = rateLimiter.check(nameLower, ipHash, cs);
+        LoginRateLimiter.Decision rl = rateLimiter.tryAcquire(nameLower, ipHash, cs);
         if (!rl.allowed()) {
             return CompletableFuture.completedFuture(RecoveryResult.wait(Status.RATE_LIMITED, rl.retryAfterSeconds()));
         }
         return accounts.findByNameLower(nameLower).thenCompose(found -> {
-            if (found.isEmpty()) return CompletableFuture.completedFuture(RecoveryResult.of(Status.NOT_REGISTERED));
+            if (found.isEmpty()) {
+                rateLimiter.releaseInFlight(nameLower, ipHash);
+                return CompletableFuture.completedFuture(RecoveryResult.of(Status.NOT_REGISTERED));
+            }
             Account acc = found.get();
             long now = clock.getAsLong();
             PendingEmailConfirmation pending = pendingConfirmations.get(acc.id());
@@ -266,12 +269,17 @@ public final class EmailRecoveryService {
                 return CompletableFuture.completedFuture(RecoveryResult.of(Status.INVALID_OR_EXPIRED_CODE));
             }
             if (!pendingConfirmations.remove(acc.id(), pending)) {
+                rateLimiter.releaseInFlight(nameLower, ipHash);
                 return CompletableFuture.completedFuture(RecoveryResult.of(Status.INVALID_OR_EXPIRED_CODE));
             }
             rateLimiter.recordSuccess(nameLower, ipHash);
             return accounts.setEmail(acc.id(), pending.email(), now)
                     .thenCompose(v -> audit.record(now, actor, "EMAIL_SET", nameLower, maskEmail(pending.email())))
                     .thenApply(v -> RecoveryResult.of(Status.SUCCESS));
+        }).exceptionally(ex -> {
+            rateLimiter.releaseInFlight(nameLower, ipHash);
+            if (ex instanceof RuntimeException re) throw re;
+            throw new RuntimeException(ex);
         });
     }
 
@@ -340,13 +348,14 @@ public final class EmailRecoveryService {
         CoreSettings cs = coreSupplier.get();
         String nameLower = UsernameValidator.normalizeLower(username);
         String ipHash = IpHmac.hashIp(secrets.hmacKey(), ip);
-        LoginRateLimiter.Decision rl = rateLimiter.check(nameLower, ipHash, cs);
+        LoginRateLimiter.Decision rl = rateLimiter.tryAcquire(nameLower, ipHash, cs);
         if (!rl.allowed()) {
             Arrays.fill(newPassword, '\0');
             return CompletableFuture.completedFuture(RecoveryResult.wait(Status.RATE_LIMITED, rl.retryAfterSeconds()));
         }
         PasswordPolicy.Violation violation = PasswordPolicy.validate(newPassword, username, cs);
         if (violation != null) {
+            rateLimiter.releaseInFlight(nameLower, ipHash);
             Arrays.fill(newPassword, '\0');
             return CompletableFuture.completedFuture(new RecoveryResult(Status.PASSWORD_POLICY_VIOLATION, violation, 0L));
         }
@@ -355,6 +364,7 @@ public final class EmailRecoveryService {
 
         return accounts.findByNameLower(nameLower).thenCompose(found -> {
             if (found.isEmpty()) {
+                rateLimiter.releaseInFlight(nameLower, ipHash);
                 Arrays.fill(pwCopy, '\0');
                 return CompletableFuture.completedFuture(RecoveryResult.of(Status.NOT_REGISTERED));
             }
@@ -396,6 +406,7 @@ public final class EmailRecoveryService {
                             return RecoveryResult.of(Status.SUCCESS);
                         }))
                         .exceptionally(ex -> {
+                            rateLimiter.releaseInFlight(nameLower, ipHash);
                             Throwable cur = ex;
                             while (cur != null) {
                                 if (cur instanceof HashingExecutor.HashingBusyException) {
@@ -406,6 +417,10 @@ public final class EmailRecoveryService {
                             throw ex instanceof RuntimeException re ? re : new RuntimeException(ex);
                         });
             });
+        }).exceptionally(ex -> {
+            rateLimiter.releaseInFlight(nameLower, ipHash);
+            if (ex instanceof RuntimeException re) throw re;
+            throw new RuntimeException(ex);
         });
     }
 

@@ -138,6 +138,15 @@ class CryptoAndSecurityTest {
         // Wrong secret rejected
         ProxyTokenSigner otherSigner = new ProxyTokenSigner(ServerSecrets.generateEphemeral().proxySecret());
         assertNull(otherSigner.verify(signer.sign(ProxyTokenSigner.MessageType.AUTH_OK, 42L, "filasik", uuid, now), now));
+
+        // Expected target server must match and empty targetServer is rejected when expectedTargetServer is given
+        byte[] unbound = signer.sign(ProxyTokenSigner.MessageType.AUTH_OK, 42L, "filasik", uuid, "", now);
+        assertNull(signer.verify(unbound, "lobby", now));
+        byte[] bound = signer.sign(ProxyTokenSigner.MessageType.AUTH_OK, 42L, "filasik", uuid, "lobby", now);
+        assertNull(signer.verify(bound, "survival", now));
+        ProxyTokenSigner.VerifiedMessage boundOk = signer.verify(bound, "LOBBY", now);
+        assertNotNull(boundOk);
+        assertEquals("lobby", boundOk.targetServer());
     }
 
     @Test
